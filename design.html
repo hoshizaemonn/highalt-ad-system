@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>広告自動化・CPA最適化システム 設計書（図解）｜High Altitude Management株式会社 御中</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef2f7; --paper:#ffffff; --ink:#0f1b2d; --ink-2:#27364b; --muted:#5b6b82; --muted-2:#8494a8;
+  --line:#e2e8f0; --line-2:#cbd5e1;
+  --blue:#2563eb; --blue-s:#eff5ff; --cyan:#0891b2; --cyan-s:#ecfdff;
+  --purple:#7c3aed; --purple-s:#f5f0ff; --green:#16a34a; --green-s:#f0fdf4;
+  --orange:#ea580c; --orange-s:#fff5ed; --red:#dc2626; --red-s:#fef2f2;
+  --navy:#0f2340;
+  --google:#4285f4; --meta:#1877f2; --ga4:#e37400; --peraichi:#00b900; --haco:#00a3a3;
+  --sans:'Noto Sans JP',-apple-system,BlinkMacSystemFont,sans-serif;
+  --serif:'Noto Serif JP',serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:var(--sans);color:var(--ink);line-height:1.7;-webkit-font-smoothing:antialiased;}
+.doc{max-width:1040px;margin:0 auto;padding:0 20px 80px;}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+
+/* COVER */
+.cover{background:linear-gradient(135deg,var(--navy),#1a3a5c);color:#fff;border-radius:0 0 20px 20px;padding:54px 56px 44px;position:relative;overflow:hidden;margin-bottom:44px;}
+.cover::after{content:"";position:absolute;right:-60px;top:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(34,211,238,.25),transparent 65%);}
+.cover .ey{font-size:12px;font-weight:700;letter-spacing:.28em;color:#7dd3fc;text-transform:uppercase;}
+.cover h1{font-family:var(--serif);font-weight:900;font-size:38px;line-height:1.35;margin-top:16px;}
+.cover h1 .hl{background:linear-gradient(90deg,#67e8f9,#a5b4fc);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.cover .sub{margin-top:16px;font-size:15px;color:#cdd9e8;max-width:680px;line-height:1.9;}
+.cover .meta{margin-top:30px;display:flex;flex-wrap:wrap;gap:14px 32px;font-size:13px;color:#e2ecf7;position:relative;z-index:2;}
+.cover .meta b{display:block;font-size:10px;letter-spacing:.18em;color:#7dd3fc;font-weight:700;margin-bottom:4px;}
+.cover .docno{position:absolute;top:26px;right:40px;font-size:11px;letter-spacing:.2em;color:#9fb6d1;font-weight:700;}
+
+/* SECTIONS */
+section{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:34px 40px;margin-bottom:28px;box-shadow:0 1px 3px rgba(15,27,45,.04);}
+.sec-h{display:flex;align-items:center;gap:16px;margin-bottom:8px;}
+.sec-no{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--cyan));color:#fff;font-weight:900;font-size:19px;display:grid;place-items:center;flex:none;font-family:var(--serif);}
+.sec-h h2{font-family:var(--serif);font-size:23px;font-weight:900;color:var(--navy);}
+.sec-h .en{font-size:10.5px;letter-spacing:.2em;color:var(--muted-2);font-weight:700;text-transform:uppercase;margin-top:3px;}
+.lead{font-size:14px;color:var(--ink-2);margin:16px 0 6px;line-height:1.95;}
+.lead b{color:var(--blue);}
+.hr{height:1px;background:var(--line);margin:26px 0;}
+
+.fig-cap{font-size:11.5px;color:var(--muted);font-weight:700;letter-spacing:.03em;margin:6px 2px 16px;display:flex;align-items:center;gap:8px;}
+.fig-cap::before{content:"FIG";font-size:9px;background:var(--navy);color:#fff;padding:2px 7px;border-radius:5px;letter-spacing:.1em;}
+
+/* NODE / FLOW primitives */
+.node{background:var(--paper);border:1.5px solid var(--line-2);border-radius:12px;padding:13px 15px;text-align:center;position:relative;}
+.node .nt{font-size:13px;font-weight:800;color:var(--ink);}
+.node .nd{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.6;}
+.node.src{border-color:var(--blue);}
+.node.google{border-top:4px solid var(--google);} .node.meta{border-top:4px solid var(--meta);}
+.node.ga4{border-top:4px solid var(--ga4);} .node.pera{border-top:4px solid var(--peraichi);} .node.haco{border-top:4px solid var(--haco);}
+
+.band{border-radius:14px;padding:16px 18px;position:relative;}
+.band .bl{position:absolute;top:14px;left:16px;font-size:10px;font-weight:800;letter-spacing:.12em;padding:3px 9px;border-radius:6px;}
+.band.l1{background:var(--blue-s);border:1px solid #cfe0ff;}
+.band.l2{background:var(--cyan-s);border:1px solid #b8ecf3;}
+.band.l3{background:var(--purple-s);border:1px solid #e3d5ff;}
+.band.l4{background:var(--orange-s);border:1px solid #ffe0c9;}
+.band.l5{background:var(--green-s);border:1px solid #c6efd3;}
+.band .bl.b1{background:var(--blue);color:#fff;} .band .bl.b2{background:var(--cyan);color:#fff;}
+.band .bl.b3{background:var(--purple);color:#fff;} .band .bl.b4{background:var(--orange);color:#fff;} .band .bl.b5{background:var(--green);color:#fff;}
+.band .cols{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap;}
+.band .cols .node{flex:1;min-width:120px;}
+
+.down{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;color:var(--muted);}
+.down .a{font-size:20px;line-height:.8;color:var(--cyan);}
+.down .lb{font-size:11px;font-weight:700;color:var(--muted);}
+
+/* horizontal flow */
+.hflow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;}
+.hflow .step{flex:1;min-width:130px;background:var(--paper);border:1.5px solid var(--line-2);border-radius:12px;padding:14px 12px;text-align:center;position:relative;}
+.hflow .step+.step{margin-left:30px;}
+.hflow .step+.step::before{content:"→";position:absolute;left:-25px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:900;color:var(--cyan);}
+.hflow .step .sn{font-size:9.5px;font-weight:800;letter-spacing:.1em;color:var(--cyan);}
+.hflow .step .st{font-size:13px;font-weight:800;margin-top:6px;}
+.hflow .step .sd{font-size:10.5px;color:var(--muted);margin-top:5px;line-height:1.6;}
+.hflow .step.key{border-color:var(--purple);background:var(--purple-s);}
+.hflow .step.goal{border-color:var(--green);background:var(--green-s);}
+
+.callout{border-radius:12px;padding:16px 18px;margin:18px 0;font-size:13px;line-height:1.9;}
+.callout .ct{font-weight:900;font-size:13px;display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.callout.warn{background:var(--red-s);border:1px solid #fbcfcf;} .callout.warn .ct{color:var(--red);}
+.callout.info{background:var(--blue-s);border:1px solid #cfe0ff;} .callout.info .ct{color:var(--blue);}
+.callout.key{background:var(--purple-s);border:1px solid #e3d5ff;} .callout.key .ct{color:var(--purple);}
+.callout b{color:var(--ink);}
+
+/* function map */
+.fmap{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fcard{border:1px solid var(--line);border-radius:12px;padding:16px 18px;border-left:4px solid var(--blue);}
+.fcard.c2{border-left-color:var(--cyan);} .fcard.c3{border-left-color:var(--purple);}
+.fcard.c4{border-left-color:var(--orange);} .fcard.c5{border-left-color:var(--green);} .fcard.c6{border-left-color:var(--red);}
+.fcard .fn{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.05em;}
+.fcard h3{font-size:15px;font-weight:800;color:var(--navy);margin:4px 0 8px;}
+.fcard p{font-size:12.5px;color:var(--ink-2);line-height:1.85;}
+.fcard .tag{display:inline-block;font-size:10px;font-weight:800;color:var(--purple);background:var(--purple-s);border:1px solid #e3d5ff;padding:2px 8px;border-radius:5px;margin-top:9px;}
+
+/* sequence */
+.seq{display:flex;flex-direction:column;gap:0;}
+.seq .srow{display:grid;grid-template-columns:64px 1fr;gap:16px;position:relative;padding-bottom:18px;}
+.seq .srow::before{content:"";position:absolute;left:31px;top:34px;bottom:-4px;width:2px;background:var(--line-2);}
+.seq .srow:last-child::before{display:none;}
+.seq .sn{width:34px;height:34px;border-radius:50%;background:var(--blue);color:#fff;font-weight:800;display:grid;place-items:center;font-size:14px;position:relative;z-index:2;}
+.seq .srow.human .sn{background:var(--orange);}
+.seq .srow.ai .sn{background:var(--purple);}
+.seq .sbody{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 15px;}
+.seq .sbody .stt{font-size:13.5px;font-weight:800;}
+.seq .sbody .sdd{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.7;}
+.seq .sbody .who{font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;margin-left:8px;vertical-align:middle;}
+.who.ai{background:var(--purple-s);color:var(--purple);} .who.sys{background:var(--cyan-s);color:var(--cyan);} .who.human{background:var(--orange-s);color:var(--orange);}
+
+/* table */
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px;}
+th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top;}
+th{background:var(--navy);color:#fff;font-weight:700;font-size:11.5px;letter-spacing:.03em;}
+th:first-child{border-radius:8px 0 0 0;} th:last-child{border-radius:0 8px 0 0;}
+tr:nth-child(even) td{background:#f8fafc;}
+td.k{font-weight:700;color:var(--navy);white-space:nowrap;}
+td .mono{font-size:11.5px;color:var(--cyan);}
+.pillrow td:first-child{font-weight:700;}
+
+/* schedule */
+.gantt{display:flex;flex-direction:column;gap:9px;margin-top:6px;}
+.grow{display:grid;grid-template-columns:180px 1fr;gap:14px;align-items:center;}
+.grow .gl{font-size:12.5px;font-weight:700;}
+.gtrack{position:relative;height:30px;background:var(--bg);border-radius:7px;overflow:hidden;}
+.gbar{position:absolute;top:4px;height:22px;border-radius:6px;display:flex;align-items:center;padding:0 10px;font-size:10.5px;font-weight:800;color:#fff;white-space:nowrap;}
+.gscale{display:grid;grid-template-columns:repeat(4,1fr);font-size:10.5px;color:var(--muted-2);font-weight:700;margin:2px 0 4px 194px;}
+
+/* deps checklist */
+.deps{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.dep{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:12px 14px;}
+.dep .box{width:20px;height:20px;border-radius:6px;border:2px solid var(--orange);flex:none;margin-top:1px;position:relative;}
+.dep .box::after{content:"!";position:absolute;inset:0;display:grid;place-items:center;color:var(--orange);font-weight:900;font-size:12px;}
+.dep .dt{font-size:13px;font-weight:800;}
+.dep .dd{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.6;}
+
+.foot{text-align:center;font-size:11.5px;color:var(--muted);margin-top:36px;line-height:2;}
+.foot b{color:var(--ink-2);}
+
+@media print{body{background:#fff;}section{box-shadow:none;break-inside:avoid;}.cover{border-radius:0;}}
+@media(max-width:720px){
+  .cover{padding:38px 26px;}.cover h1{font-size:27px;}section{padding:24px 20px;}
+  .fmap,.deps{grid-template-columns:1fr;}.band .cols .node{min-width:100%;}
+  .grow{grid-template-columns:1fr;}.gscale{margin-left:0;}.hflow .step+.step{margin-left:0;margin-top:26px;}
+  .hflow .step+.step::before{content:"↓";left:50%;top:-24px;transform:translateX(-50%);}
+}
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <!-- COVER -->
+  <header class="cover">
+    <div class="docno">DES-2026-002</div>
+    <div class="ey">System Design Document</div>
+    <h1>広告自動化・CPA最適化システム<br><span class="hl">設計書</span>（図解）</h1>
+    <p class="sub">来期の通期黒字化に向けて、7店舗の広告費を「毎日自動で見える化 → AIが提案 → 承認して予算を寄せ直す」サイクルで最適化するシステムの設計を、図で示します。</p>
+    <div class="meta">
+      <div><b>提出先</b>High Altitude Management株式会社 御中</div>
+      <div><b>作成</b>株式会社斗（hishaku）</div>
+      <div><b>関連文書</b>SYS-2026-002 ／ REQ-2026-002</div>
+      <div><b>発行日</b>2026年7月</div>
+    </div>
+  </header>
+
+  <!-- 1. 概要 -->
+  <section>
+    <div class="sec-h"><div class="sec-no">1</div><div><h2>システムの目的</h2><div class="en">Overview</div></div></div>
+    <p class="lead">現在、広告運用はB-max様に委託されており、<b>「どの店舗に・どの広告から・1人いくらで来たか」が把握できていない</b>状態です。全体の数字は見えても、店舗別・広告別に「止める／増やす」を判断する根拠がありません。本システムは、この“見えない”構造を解消し、広告費の無駄を日次で止めます。</p>
+    <div class="hflow" style="margin-top:20px">
+      <div class="step"><div class="sn">目的</div><div class="st">通期黒字化</div><div class="sd">来期の経営ゴール</div></div>
+      <div class="step"><div class="sn">手段</div><div class="st">広告費 ▲1,000万円/年</div><div class="sd">またはCPA同等改善</div></div>
+      <div class="step key"><div class="sn">仕組み</div><div class="st">見える化→提案→寄せ直し</div><div class="sd">毎日・自動で回す</div></div>
+      <div class="step goal"><div class="sn">期限</div><div class="st">2026年9月末</div><div class="sd">年度末までに稼働</div></div>
+    </div>
+  </section>
+
+  <!-- 2. 全体アーキテクチャ -->
+  <section>
+    <div class="sec-h"><div class="sec-no">2</div><div><h2>システム全体構成</h2><div class="en">Architecture</div></div></div>
+    <p class="lead">5つのデータソースを<b>毎日自動で収集</b>し、SQLiteに一元蓄積。UTMと動線データで店舗を判定し、店舗別CPAの算出・AI提案・レポートを生成して、既存のPLダッシュボードまで連携します。</p>
+    <div class="fig-cap">データソース → 収集 → 蓄積・突合 → 分析・判定 → 出力 の5層構成</div>
+
+    <div class="band l1"><span class="bl b1">① データソース</span>
+      <div class="cols">
+        <div class="node google"><div class="nt">Google広告</div><div class="nd">費用・表示・クリック・CV</div></div>
+        <div class="node meta"><div class="nt">Meta広告</div><div class="nd">Instagram / Facebook</div></div>
+        <div class="node ga4"><div class="nt">GA4</div><div class="nd">流入経路・店舗別導線</div></div>
+        <div class="node pera"><div class="nt">ペライチ LP</div><div class="nd">店舗別クリック・離脱</div></div>
+        <div class="node haco"><div class="nt">hacomono</div><div class="nd">体験予約・入会（実売）</div></div>
+      </div>
+    </div>
+    <div class="down"><span class="a">▼</span><span class="lb">API連携で毎日自動取得（CSV手作業ゼロ）</span></div>
+
+    <div class="band l2"><span class="bl b2">② 収集</span>
+      <div class="cols">
+        <div class="node"><div class="nt">広告コレクター</div><div class="nd">meta_ads / google_ads<br>キャンペーン・広告別に日次取得</div></div>
+        <div class="node"><div class="nt">導線コレクター</div><div class="nd">GA4 / ペライチ<br>流入経路・店舗ページ到達</div></div>
+        <div class="node"><div class="nt">実売コレクター</div><div class="nd">hacomono<br>体験予約・入会データ</div></div>
+      </div>
+    </div>
+    <div class="down"><span class="a">▼</span><span class="lb">正規化して蓄積</span></div>
+
+    <div class="band l3"><span class="bl b3">③ データ基盤・突合</span>
+      <div class="cols">
+        <div class="node"><div class="nt">SQLite「ad_performance」</div><div class="nd">店舗×媒体×キャンペーン×広告 の日次成果を一元管理</div></div>
+        <div class="node"><div class="nt">突合エンジン</div><div class="nd">UTM＋GA4＋ペライチ＋hacomono を突き合わせ、店舗を確定（→ §4）</div></div>
+      </div>
+    </div>
+    <div class="down"><span class="a">▼</span><span class="lb">集計・分析</span></div>
+
+    <div class="band l4"><span class="bl b4">④ 分析・判定</span>
+      <div class="cols">
+        <div class="node"><div class="nt">店舗判定</div><div class="nd">動線再構成で店舗を推定</div></div>
+        <div class="node"><div class="nt">CPA集計</div><div class="nd">体験CPA・入会CPA・体験→入会率</div></div>
+        <div class="node"><div class="nt">AI提案生成</div><div class="nd">止める/寄せる候補・改善効果試算</div></div>
+      </div>
+    </div>
+    <div class="down"><span class="a">▼</span><span class="lb">出力</span></div>
+
+    <div class="band l5"><span class="bl b5">⑤ 出力・連携</span>
+      <div class="cols">
+        <div class="node"><div class="nt">店舗別CPAダッシュボード</div><div class="nd">7店舗横断・広告別ランキング</div></div>
+        <div class="node"><div class="nt">日次レポート＋提案</div><div class="nd">毎朝の打ち手・予算配分</div></div>
+        <div class="node"><div class="nt">AIクリエイティブ</div><div class="nd">広告文・動画プロンプト生成</div></div>
+        <div class="node"><div class="nt">既存PLダッシュボード</div><div class="nd">販促費に反映（→ §7）</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 機能構成 -->
+  <section>
+    <div class="sec-h"><div class="sec-no">3</div><div><h2>機能構成（6機能）</h2><div class="en">Functions ／ 要件定義 5-1〜5-6</div></div></div>
+    <p class="lead">要件定義 REQ-2026-002 の第5章に対応する6つの機能で構成します。</p>
+    <div class="fmap">
+      <div class="fcard c1"><div class="fn">FUNCTION 5-1</div><h3>広告データ自動収集</h3><p>Google・Meta広告の成果をAPIで毎日自動取得。キャンペーン別・広告別に日次蓄積し、CSVダウンロード作業をゼロに。</p></div>
+      <div class="fcard c2"><div class="fn">FUNCTION 5-2 ★本案件の肝</div><h3>店舗別CPA見える化</h3><p>「どの店舗に・どの広告から・1人いくらで来たか」を7店舗マトリクスで毎日更新。体験CPA・入会CPA・体験→入会率を店舗別に算出。<span class="tag">店舗判定＝動線再構成（§4）</span></p></div>
+      <div class="fcard c3"><div class="fn">FUNCTION 5-3</div><h3>日次レポート＋予算提案</h3><p>毎朝、前日成果と「今日やるべき打ち手」を自動生成。CPA悪化アラート、止める候補・寄せる候補を抽出。<span class="tag">AIは提案・実行は人の承認後</span></p></div>
+      <div class="fcard c4"><div class="fn">FUNCTION 5-4</div><h3>動線設計アドバイス</h3><p>動線の離脱ポイントを可視化し改善案を提示（LINE導線化・1枚フォーム化・Health Step活用・LP改善）。分析に基づく提案まで。</p></div>
+      <div class="fcard c5"><div class="fn">FUNCTION 5-5</div><h3>AIクリエイティブ生成</h3><p>勝ちパターンから広告文・画像案・動画プロンプトを自動生成。動画は Seedance（高品質・約¥1万/本）／無料簡易 の2方式。</p></div>
+      <div class="fcard c6"><div class="fn">FUNCTION 5-6 ★土台</div><h3>計測基盤の整備</h3><p>全広告URLへUTMを統一付与（店舗・媒体・KWを識別）。非計測流入（電話・来店・紹介）は入会時の「きっかけ」記録で補完。</p></div>
+    </div>
+  </section>
+
+  <!-- 4. 店舗判定ロジック -->
+  <section>
+    <div class="sec-h"><div class="sec-no">4</div><div><h2>店舗判定ロジック（本案件の肝）</h2><div class="en">Store Attribution</div></div></div>
+    <div class="callout warn"><div class="ct">⚠ 課題：キャンペーン名では店舗を判定できない</div>
+      現在、B-max様の運用ではキャンペーンが店舗別に切られておらず、「どの店舗に流入したか」が不明です。<b>この特定こそが本案件の中核的な解決対象</b>です。</div>
+    <p class="lead"><b>解決：動線の再構成。</b> 広告→LP→店舗ページ→体験予約の経路を、UTM・GA4・ペライチ・hacomonoのデータで突き合わせて店舗を確定します。</p>
+    <div class="fig-cap">動線再構成による店舗判定フロー</div>
+    <div class="hflow">
+      <div class="step"><div class="sn">STEP 1</div><div class="st">広告クリック</div><div class="sd">URLにUTM付与<br><span class="mono">store / media / campaign</span></div></div>
+      <div class="step"><div class="sn">STEP 2</div><div class="st">ペライチ LP</div><div class="sd">GA4で経路計測<br>クライアントID紐付け</div></div>
+      <div class="step"><div class="sn">STEP 3</div><div class="st">店舗ページ到達</div><div class="sd">どの店舗ページを見たか</div></div>
+      <div class="step"><div class="sn">STEP 4</div><div class="st">hacomono体験予約</div><div class="sd">予約店舗が確定</div></div>
+      <div class="step key"><div class="sn">突合</div><div class="st">店舗を確定</div><div class="sd">UTM＋GA4＋予約店舗を突合</div></div>
+    </div>
+    <div class="callout info"><div class="ct">◆ 優先順位</div>
+      <b>① UTM（一次ソース）</b> … 統一付与後は最も確実。 <b>② GA4＋ペライチの経路</b> … UTM欠損時の補完。 <b>③ キャンペーン名キーワード</b> … あくまで補助。<br>
+      非計測流入（電話・来店・紹介）は、入会時の<b>「きっかけ」記録</b>で運用補完します。</div>
+  </section>
+
+  <!-- 5. 日次処理フロー -->
+  <section>
+    <div class="sec-h"><div class="sec-no">5</div><div><h2>日次処理フロー</h2><div class="en">Daily Pipeline ／ 毎朝 自動実行</div></div></div>
+    <p class="lead">毎朝、以下が自動で走ります。ポイントは<b>「AIは提案まで・実際の予算変更は担当者の承認後」</b>という人が介在する設計です。</p>
+    <div class="seq">
+      <div class="srow"><div class="sn">1</div><div class="sbody"><div class="stt">データ収集<span class="who sys">自動</span></div><div class="sdd">Google/Meta広告APIを叩き、GA4・hacomonoのデータを取り込み。前日1日分を取得。</div></div></div>
+      <div class="srow"><div class="sn">2</div><div class="sbody"><div class="stt">突合・店舗判定<span class="who sys">自動</span></div><div class="sdd">UTM＋GA4＋ペライチ＋hacomonoを突合し、広告成果に店舗を紐付け（§4）。</div></div></div>
+      <div class="srow"><div class="sn">3</div><div class="sbody"><div class="stt">CPA集計<span class="who sys">自動</span></div><div class="sdd">店舗×媒体×広告で 体験CPA・入会CPA・体験→入会率 を算出。広告別ランキングを更新。</div></div></div>
+      <div class="srow ai"><div class="sn">4</div><div class="sbody"><div class="stt">AI提案生成<span class="who ai">AI</span></div><div class="sdd">CPA悪化を検知し「止める候補」「予算を寄せる候補」を抽出。採用時の改善効果を試算。</div></div></div>
+      <div class="srow ai"><div class="sn">5</div><div class="sbody"><div class="stt">日次レポート配信<span class="who ai">AI</span></div><div class="sdd">前日サマリ＋今日の打ち手をレポート化。ダッシュボードとレポートに反映。</div></div></div>
+      <div class="srow human"><div class="sn">6</div><div class="sbody"><div class="stt">承認 → 予算変更を実行<span class="who human">担当者</span></div><div class="sdd">担当者が提案を確認して承認。予算の寄せ直し・配信停止を実行（御社は提案を見て選ぶだけ）。</div></div></div>
+    </div>
+  </section>
+
+  <!-- 6. データモデル -->
+  <section>
+    <div class="sec-h"><div class="sec-no">6</div><div><h2>データモデル</h2><div class="en">Data Model ／ ad_performance</div></div></div>
+    <p class="lead">中核テーブル <span class="mono">ad_performance</span> に、店舗×媒体×キャンペーン×広告の日次成果を一元管理します（実装済みスキーマ）。</p>
+    <table>
+      <thead><tr><th>カラム</th><th>型</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td class="k mono">date</td><td>TEXT</td><td>日付（YYYY-MM-DD）</td></tr>
+        <tr><td class="k mono">media</td><td>TEXT</td><td>媒体（meta ／ google）</td></tr>
+        <tr><td class="k mono">store</td><td>TEXT</td><td>店舗名 ／「未判定」（§4で判定）</td></tr>
+        <tr><td class="k mono">campaign_name</td><td>TEXT</td><td>キャンペーン名</td></tr>
+        <tr><td class="k mono">adset_name / ad_name</td><td>TEXT</td><td>広告セット名 ／ 広告名</td></tr>
+        <tr><td class="k mono">impressions / clicks</td><td>INTEGER</td><td>表示回数 ／ クリック数</td></tr>
+        <tr><td class="k mono">spend</td><td>REAL</td><td>広告費（円）</td></tr>
+        <tr><td class="k mono">conversions</td><td>REAL</td><td>媒体側CV（体験申込 等）</td></tr>
+        <tr><td class="k mono">lp_views</td><td>INTEGER</td><td>LP到達数（動線分析用）</td></tr>
+      </tbody>
+    </table>
+    <p class="lead" style="font-size:12.5px;color:var(--muted);margin-top:14px">※ 体験CPA・入会CPA・体験→入会率は、この表と hacomono 実売データの突合から算出します。ユニークキー <span class="mono">(date, media, campaign, adset, ad)</span> で日次UPSERT（重複なし）。</p>
+  </section>
+
+  <!-- 7. PL統合 -->
+  <section>
+    <div class="sec-h"><div class="sec-no">7</div><div><h2>既存PLダッシュボードとの統合</h2><div class="en">Integration ／ 要件定義 6章</div></div></div>
+    <p class="lead">既に運用中の <b>PL管理ダッシュボード（7店舗・Next.js）</b> に広告サマリを接続。広告費 → 体験・入会 → 店舗別PL（販促費）→ 黒字化まで一気通貫で追えます。<b>広告レポートだけを納品する会社との最大の違い</b>です。</p>
+    <div class="fig-cap">広告投資 → 最終PL（黒字化）まで一気通貫</div>
+    <div class="hflow">
+      <div class="step"><div class="sn">LAYER 1</div><div class="st">広告費</div><div class="sd">媒体別・店舗別に自動取得（本システム）</div></div>
+      <div class="step"><div class="sn">LAYER 2</div><div class="st">体験 → 入会</div><div class="sd">hacomonoと自動突合</div></div>
+      <div class="step"><div class="sn">LAYER 3</div><div class="st">店舗別PL（販促費）</div><div class="sd">既存ダッシュボードに反映</div></div>
+      <div class="step goal"><div class="sn">LAYER 4</div><div class="st">通期黒字化</div><div class="sd">広告効率→PLの効きを毎月確認</div></div>
+    </div>
+    <div class="callout info"><div class="ct">◆ 統合方式</div>収集〜集計は媒体非依存で実装済み（Python＋SQLite）。既存ダッシュボードへの<b>表示統合方式（Next.js側に取り込む／専用画面を追加）は、現状分析を踏まえ最小工数の形で確定</b>します。</div>
+  </section>
+
+  <!-- 8. 技術構成 -->
+  <section>
+    <div class="sec-h"><div class="sec-no">8</div><div><h2>技術構成</h2><div class="en">Tech Stack</div></div></div>
+    <table>
+      <thead><tr><th>領域</th><th>技術</th><th>備考</th></tr></thead>
+      <tbody class="pillrow">
+        <tr><td>データ収集</td><td>Python（各媒体API / GA4 / hacomono）</td><td>S'aimer・MichiruSilica の日次分析基盤を横展開</td></tr>
+        <tr><td>データ蓄積</td><td>SQLite（ad_performance）</td><td>媒体非依存・日次UPSERT・実装済み</td></tr>
+        <tr><td>店舗判定・集計</td><td>Python（突合エンジン）</td><td>UTM＋GA4＋ペライチ＋hacomono</td></tr>
+        <tr><td>AI提案・生成</td><td>生成AI（提案文・広告文・動画プロンプト）</td><td>提案型・実行は人の承認後</td></tr>
+        <tr><td>表示・統合</td><td>既存 Next.js PLダッシュボード</td><td>7店舗運用中に接続</td></tr>
+        <tr><td>動画生成</td><td>Seedance（高品質）／ 無料簡易</td><td>Seedanceは実費 約¥1万/本</td></tr>
+      </tbody>
+    </table>
+    <div class="callout info" style="margin-top:18px"><div class="ct">◆ セキュリティ</div>認証情報は環境変数（.env）で管理しコードにハードコードしない。<b>会員個人情報（氏名・連絡先等）はDB・ログ・AIプロンプトに載せない</b>（既存ダッシュボードのセキュリティ方針を踏襲）。</div>
+  </section>
+
+  <!-- 9. 前提・依存 -->
+  <section>
+    <div class="sec-h"><div class="sec-no">9</div><div><h2>着手に必要なもの（前提・依存）</h2><div class="en">Prerequisites ／ 要件定義 9章</div></div></div>
+    <p class="lead">自動収集を稼働させるには、以下の<b>接続用の識別子・トークン</b>が必要です（発行手順は画面キャプチャ付きでご案内します）。</p>
+    <div class="deps">
+      <div class="dep"><div class="box"></div><div><div class="dt">Meta 広告アカウントID＋トークン</div><div class="dd"><span class="mono">act_〜</span> ／ システムユーザートークン（ads_read）</div></div></div>
+      <div class="dep"><div class="box"></div><div><div class="dt">Google広告 接続情報</div><div class="dd">customer_id ／ developer token ／ OAuth承認</div></div></div>
+      <div class="dep"><div class="box"></div><div><div class="dt">GA4 接続情報</div><div class="dd">property_id ／ サービスアカウント連携</div></div></div>
+      <div class="dep"><div class="box"></div><div><div class="dt">ペライチ ID／PW</div><div class="dd">LP内の店舗別クリック・離脱の分析用</div></div></div>
+      <div class="dep"><div class="box"></div><div><div class="dt">hacomono 出力サンプル</div><div class="dd">体験予約・入会データの形式（1件）</div></div></div>
+      <div class="dep"><div class="box"></div><div><div class="dt">UTM付与・LP調整の協力</div><div class="dd">全広告URLへのUTM統一付与＋軽微なLP調整</div></div></div>
+    </div>
+    <div class="callout key" style="margin-top:18px"><div class="ct">◆ クリティカルパス</div>この中で <b>UTM設計（5-6）</b> が全ての土台です。UTMが統一付与されて初めて店舗判定（§4）が一次ソースで動くため、<b>開発の最初の一手はUTM設計</b>とします。</div>
+  </section>
+
+  <!-- 10. スケジュール -->
+  <section>
+    <div class="sec-h"><div class="sec-no">10</div><div><h2>開発スケジュール</h2><div class="en">Schedule ／ 9月末納品</div></div></div>
+    <div class="gscale"><span>7月</span><span>8月</span><span>9月前半</span><span>9月後半</span></div>
+    <div class="gantt">
+      <div class="grow"><div class="gl">現状分析</div><div class="gtrack"><div class="gbar" style="left:0%;width:24%;background:var(--blue)">CPA・流入分析</div></div></div>
+      <div class="grow"><div class="gl">計測基盤整備（UTM）</div><div class="gtrack"><div class="gbar" style="left:24%;width:16%;background:var(--red)">土台</div></div></div>
+      <div class="grow"><div class="gl">開発①（収集・見える化）</div><div class="gtrack"><div class="gbar" style="left:26%;width:32%;background:var(--cyan)">API連携・店舗別CPA</div></div></div>
+      <div class="grow"><div class="gl">開発②（レポート・提案・生成）</div><div class="gtrack"><div class="gbar" style="left:52%;width:26%;background:var(--purple)">日次提案・動線・生成</div></div></div>
+      <div class="grow"><div class="gl">テスト・調整</div><div class="gtrack"><div class="gbar" style="left:72%;width:18%;background:var(--orange)">実データ検証</div></div></div>
+      <div class="grow"><div class="gl">納品・運用開始</div><div class="gtrack"><div class="gbar" style="left:88%;width:12%;background:var(--green)">本番稼働</div></div></div>
+    </div>
+    <div class="callout info" style="margin-top:20px"><div class="ct">◆ 費用（SYS-2026-002）</div>開発費 <b>¥400,000（税別）／¥440,000（税込）</b>。動線設計アドバイス（5-4）は分析・提案の範囲で本費用に含む。動画にSeedanceを使う場合のみAI生成クレジット（1本約¥1万）が実費。</div>
+  </section>
+
+  <div class="foot">
+    <b>広告自動化・CPA最適化システム 設計書（DES-2026-002）</b><br>
+    High Altitude Management株式会社 御中 ／ 制作：株式会社斗（hishaku）／ 関連：SYS-2026-002・REQ-2026-002<br>
+    ※ 完成イメージは別紙モックアップをご覧ください。
+  </div>
+
+</div>
+</body>
+</html>
