@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>使い方ガイド（図解）｜広告運用コントロールセンター</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef2f7;--paper:#fff;--ink:#0f1b2d;--ink2:#2a3a52;--muted:#5b6b82;--line:#e2e8f0;
+  --navy:#0f2340;--blue:#2563eb;--blue-s:#eff5ff;--cyan:#0891b2;--cyan-s:#ecfdff;
+  --green:#16a34a;--green-s:#f0fdf4;--orange:#ea580c;--orange-s:#fff5ed;--red:#dc2626;--red-s:#fef2f2;--purple:#7c3aed;--purple-s:#f5f0ff;
+  --sans:'Noto Sans JP',sans-serif;--serif:'Noto Serif JP',serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:var(--sans);color:var(--ink);line-height:1.75;-webkit-font-smoothing:antialiased;}
+.doc{max-width:1000px;margin:0 auto;padding:0 20px 70px;}
+.cover{background:linear-gradient(135deg,var(--navy),#1a3a5c);color:#fff;border-radius:0 0 20px 20px;padding:46px 48px 40px;margin-bottom:36px;position:relative;overflow:hidden;}
+.cover::after{content:"";position:absolute;right:-50px;top:-50px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(34,211,238,.25),transparent 65%);}
+.cover .ey{font-size:12px;font-weight:700;letter-spacing:.26em;color:#7dd3fc;}
+.cover h1{font-family:var(--serif);font-weight:900;font-size:32px;line-height:1.4;margin-top:14px;}
+.cover p{margin-top:14px;font-size:14px;color:#cdd9e8;max-width:620px;}
+section{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:32px 36px;margin-bottom:26px;box-shadow:0 1px 3px rgba(15,27,45,.04);}
+.sh{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+.sn{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--cyan));color:#fff;font-weight:900;font-size:18px;display:grid;place-items:center;flex:none;font-family:var(--serif);}
+.sh h2{font-family:var(--serif);font-size:22px;font-weight:900;color:var(--navy);}
+.sh .en{font-size:10px;letter-spacing:.18em;color:var(--muted);font-weight:700;margin-top:2px;}
+
+/* 3-step */
+.steps{display:flex;gap:0;flex-wrap:wrap;}
+.step{flex:1;min-width:180px;text-align:center;padding:8px 14px;position:relative;}
+.step+.step::before{content:"→";position:absolute;left:-12px;top:44px;font-size:26px;font-weight:900;color:var(--cyan);}
+.step .circle{width:80px;height:80px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;font-size:34px;position:relative;}
+.step.s1 .circle{background:var(--blue-s);border:2px solid var(--blue);}
+.step.s2 .circle{background:var(--red-s);border:2px solid var(--red);}
+.step.s3 .circle{background:var(--green-s);border:2px solid var(--green);}
+.step .no{position:absolute;top:-6px;right:-6px;width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-size:13px;font-weight:900;display:grid;place-items:center;}
+.step h3{font-size:16px;font-weight:900;color:var(--navy);}
+.step p{font-size:12.5px;color:var(--muted);margin-top:7px;line-height:1.75;}
+.step .tip{margin-top:9px;font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-s);border-radius:7px;padding:5px 9px;display:inline-block;}
+
+/* dashboard schematic */
+.wrap{display:grid;grid-template-columns:1.35fr 1fr;gap:24px;align-items:start;}
+.schema{background:#0b1628;border-radius:14px;padding:14px;display:grid;grid-template-columns:34px 1fr 78px;grid-template-rows:auto auto auto;gap:8px;}
+.z{border-radius:8px;position:relative;padding:10px 8px;font-size:10px;font-weight:800;color:#cfe0ff;min-height:38px;display:flex;align-items:center;justify-content:center;text-align:center;}
+.z .bnum{position:absolute;top:-8px;left:-8px;width:22px;height:22px;border-radius:50%;background:var(--cyan);color:#04121f;font-size:12px;font-weight:900;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.4);}
+.z.side{grid-row:1/4;background:rgba(255,255,255,.06);writing-mode:vertical-rl;font-size:9px;}
+.z.kpi{grid-column:2/4;background:linear-gradient(90deg,rgba(37,99,235,.35),rgba(34,211,238,.2));}
+.z.chart{background:rgba(34,211,238,.14);min-height:90px;}
+.z.ai{grid-row:2/4;background:linear-gradient(180deg,rgba(124,58,237,.3),rgba(34,211,238,.12));}
+.z.store{background:rgba(163,230,53,.14);min-height:70px;}
+.legend2{display:flex;flex-direction:column;gap:12px;}
+.lg{display:flex;gap:12px;align-items:flex-start;}
+.lg .n{width:24px;height:24px;border-radius:50%;background:var(--cyan);color:#04121f;font-weight:900;font-size:12px;display:grid;place-items:center;flex:none;}
+.lg .t{font-size:13px;font-weight:800;color:var(--navy);}
+.lg .d{font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:2px;}
+.lg .d b{color:var(--red);}
+.lg .d .do{color:var(--green);font-weight:800;}
+
+/* how it works */
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin-top:4px;}
+.fb{flex:1;min-width:150px;background:#f8fafc;border:1.5px solid var(--line);border-radius:12px;padding:16px 14px;text-align:center;position:relative;}
+.fb+.fb{margin-left:26px;}
+.fb+.fb::before{content:"→";position:absolute;left:-22px;top:50%;transform:translateY(-50%);font-size:20px;font-weight:900;color:var(--cyan);}
+.fb .ic{font-size:26px;}
+.fb .t{font-size:13.5px;font-weight:800;margin-top:8px;}
+.fb .d{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.6;}
+.fb.auto{background:var(--cyan-s);border-color:var(--cyan);}
+.autotag{text-align:center;margin-top:14px;font-size:12px;font-weight:800;color:var(--cyan);}
+
+/* now/future */
+.nf{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.nfc{border-radius:12px;padding:18px 20px;}
+.nfc.now{background:var(--orange-s);border:1px solid #ffe0c9;}
+.nfc.future{background:var(--green-s);border:1px solid #c6efd3;}
+.nfc .h{font-size:14px;font-weight:900;display:flex;align-items:center;gap:8px;}
+.nfc.now .h{color:var(--orange);} .nfc.future .h{color:var(--green);}
+.nfc ul{margin:12px 0 0;padding-left:18px;}
+.nfc li{font-size:12.5px;color:var(--ink2);margin-bottom:6px;line-height:1.7;}
+
+.callout{margin-top:20px;background:var(--blue-s);border:1px solid #cfe0ff;border-radius:12px;padding:16px 18px;font-size:13px;line-height:1.85;}
+.callout b{color:var(--blue);}
+.foot{text-align:center;font-size:11px;color:var(--muted);margin-top:30px;line-height:1.9;}
+@media(max-width:720px){.wrap{grid-template-columns:1fr;}.nf{grid-template-columns:1fr;}.step+.step::before{display:none;}.fb+.fb{margin-left:0;margin-top:22px;}.fb+.fb::before{content:"↓";left:50%;top:-20px;transform:translateX(-50%);}.cover{padding:34px 24px;}.cover h1{font-size:24px;}section{padding:24px 20px;}}
+</style>
+</head>
+<body>
+<div class="doc">
+  <header class="cover">
+    <div class="ey">HOW TO USE</div>
+    <h1>広告運用コントロールセンター<br>使い方ガイド（図解）</h1>
+    <p>難しい操作はありません。「毎日ちょっと見て、AIの提案を承認するだけ」。この1枚で使い方がわかります。</p>
+  </header>
+
+  <!-- 1. 毎日の使い方 -->
+  <section>
+    <div class="sh"><div class="sn">1</div><div><h2>毎日の使い方（3ステップ）</h2><div class="en">DAILY ROUTINE</div></div></div>
+    <div class="steps">
+      <div class="step s1">
+        <div class="circle">🖱️<span class="no">1</span></div>
+        <h3>ダブルクリックで開く</h3>
+        <p>フォルダの<br>「ダッシュボードを見る」を<br>ダブルクリック</p>
+        <span class="tip">1日1回・朝でOK</span>
+      </div>
+      <div class="step s2">
+        <div class="circle">🔴<span class="no">2</span></div>
+        <h3>赤い店を見つける</h3>
+        <p>店舗別CPA表で<br><b style="color:var(--red)">「要改善」（赤）</b>の店＝<br>1人獲得に高くついている店</p>
+        <span class="tip">高い＝ムダが多い</span>
+      </div>
+      <div class="step s3">
+        <div class="circle">✅<span class="no">3</span></div>
+        <h3>AI提案を承認する</h3>
+        <p>右のAIが<br>「止める・寄せる」を提案。<br>「承認」を押すだけ</p>
+        <span class="tip">判断はAIがやる</span>
+      </div>
+    </div>
+    <div class="callout">💡 つまり運用は <b>「開く → 赤い店を見る → 承認を押す」</b> の3つだけ。数字の集計も、どこを直すかの判断も、システムが自動でやります。</div>
+  </section>
+
+  <!-- 2. 画面の見方 -->
+  <section>
+    <div class="sh"><div class="sn">2</div><div><h2>画面の見方</h2><div class="en">SCREEN MAP ／ どこに何があるか</div></div></div>
+    <div class="wrap">
+      <div class="schema">
+        <div class="z side"><span class="bnum">1</span>メニュー</div>
+        <div class="z kpi"><span class="bnum">2</span>KPI（全体の数字）</div>
+        <div class="z chart"><span class="bnum">3</span>推移グラフ</div>
+        <div class="z ai"><span class="bnum">5</span>AI提案<br>（止める/寄せる）</div>
+        <div class="z store"><span class="bnum">4</span>店舗別CPAマトリクス（7店舗）</div>
+      </div>
+      <div class="legend2">
+        <div class="lg"><span class="n">1</span><div><div class="t">左メニュー</div><div class="d">店舗別CPA・媒体・動線など各画面へ。まずは「Overview」でOK。</div></div></div>
+        <div class="lg"><span class="n">2</span><div><div class="t">KPI（上の数字）</div><div class="d">広告費・体験・入会・CPAの全体。<span class="do">まず全体をざっと把握。</span></div></div></div>
+        <div class="lg"><span class="n">3</span><div><div class="t">推移グラフ</div><div class="d">日次/週次/月次で流れを確認。良くなっているか一目。</div></div></div>
+        <div class="lg"><span class="n">4</span><div><div class="t">店舗別CPAマトリクス ★重要</div><div class="d"><b>赤=要改善</b>の店を探す。見出しクリックで並べ替え。</div></div></div>
+        <div class="lg"><span class="n">5</span><div><div class="t">AI提案</div><div class="d">今日の打ち手。<span class="do">「承認」を押すだけ。</span>実際の予算変更は承認後。</div></div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:26px;border-top:1px dashed var(--line);padding-top:22px;">
+      <h3 style="font-size:15px;font-weight:900;color:var(--navy);margin-bottom:3px;">▼ 毎日いちばん見る「2つのパネル」を詳しく</h3>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">この2つが分かれば運用できます。</p>
+      <div class="nf">
+        <div style="border:1px solid var(--line);border-radius:12px;padding:16px 18px;border-left:4px solid var(--cyan);">
+          <div style="font-size:11px;font-weight:800;color:var(--muted);">要件 5-2 ／ 画面まん中</div>
+          <h4 style="font-size:15px;font-weight:800;color:var(--navy);margin:3px 0 10px;">🏬 店舗別CPAマトリクス</h4>
+          <p style="font-size:12.5px;color:var(--ink2);line-height:1.85;">7店舗を横並びで比較。<b>「どの店に・どの広告から・1人いくらで来たか」</b>が一覧で並びます。</p>
+          <div style="margin-top:12px;font-size:12px;line-height:1.95;">
+            <div style="font-weight:700;">右端「判定」の色で一目：</div>
+            <div>🟢 良好 ＝ CPAが低い（効率よし・そのまま）</div>
+            <div>🟠 注意 ＝ ちょっと高い（様子見）</div>
+            <div style="color:var(--red);font-weight:700;">🔴 要改善 ＝ CPAが高い ＝ ムダが多い店</div>
+          </div>
+          <div style="margin-top:12px;font-size:12px;background:var(--cyan-s);border:1px solid #b8ecf3;border-radius:8px;padding:10px 12px;line-height:1.7;">💡 見出し「体験CPA」を<b>クリックすると並べ替え</b>。高い順にすると<b>赤い店が上に集まる</b>ので探しやすい。</div>
+        </div>
+        <div style="border:1px solid var(--line);border-radius:12px;padding:16px 18px;border-left:4px solid var(--purple);">
+          <div style="font-size:11px;font-weight:800;color:var(--muted);">要件 5-3 ／ 画面右側</div>
+          <h4 style="font-size:15px;font-weight:800;color:var(--navy);margin:3px 0 10px;">🤖 AI日次レポート＋予算提案</h4>
+          <p style="font-size:12.5px;color:var(--ink2);line-height:1.85;">前日成績のまとめと<b>「今日やるべき打ち手」</b>を毎朝AIが提示。ここが STEP3「承認」の場所。</p>
+          <div style="margin-top:12px;font-size:12px;line-height:1.95;">
+            <div><b>本日のサマリ</b> … 前日の体験/入会・全体CPA</div>
+            <div><b>推定改善効果 +○%</b> … 提案を全部採用したらどれだけ改善するか</div>
+            <div><b>止める候補／寄せる候補</b> … 具体策＋<b>[承認][却下]</b>ボタン</div>
+          </div>
+          <div style="margin-top:12px;font-size:12px;background:var(--purple-s);border:1px solid #e3d5ff;border-radius:8px;padding:10px 12px;line-height:1.7;">✅ あなたは<b>「承認」を押すだけ</b>。実際の予算変更は<b>承認後に人が実行</b>（AIが勝手に動かさない）。</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:26px;border-top:1px dashed var(--line);padding-top:22px;">
+      <h3 style="font-size:15px;font-weight:900;color:var(--navy);margin-bottom:3px;">▼ 左メニュー 早見表</h3>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">押すとその項目の場所へ移動します（今は全部Overview1画面に集約）。</p>
+      <div style="display:grid;grid-template-columns:1fr;gap:8px;">
+        <div style="display:grid;grid-template-columns:120px 46px 1fr;gap:10px;align-items:center;font-size:12.5px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;"><b style="color:var(--navy);">📊 Overview</b><span style="color:var(--muted);font-size:10px;">全体</span><span style="color:var(--ink2);">下記すべてが1画面に。まずここでざっと把握</span></div>
+        <div style="display:grid;grid-template-columns:120px 46px 1fr;gap:10px;align-items:center;font-size:12.5px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;border-left:3px solid var(--cyan);"><b style="color:var(--navy);">📈 店舗別CPA</b><span style="color:var(--purple);font-size:10px;font-weight:800;">5-2</span><span style="color:var(--ink2);">7店舗のCPA比較。<b style="color:var(--red);">赤い店</b>を探す ★重要</span></div>
+        <div style="display:grid;grid-template-columns:120px 46px 1fr;gap:10px;align-items:center;font-size:12.5px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;"><b style="color:var(--navy);">🌐 媒体・広告別</b><span style="color:var(--purple);font-size:10px;font-weight:800;">5-1</span><span style="color:var(--ink2);">Google/Meta別・広告別のランキング（どれが効いてるか）</span></div>
+        <div style="display:grid;grid-template-columns:120px 46px 1fr;gap:10px;align-items:center;font-size:12.5px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;"><b style="color:var(--navy);">🔻 動線分析</b><span style="color:var(--purple);font-size:10px;font-weight:800;">5-4</span><span style="color:var(--ink2);">広告→LP→店舗ページ→体験の<b>離脱ポイント</b>＋改善提案</span></div>
+        <div style="display:grid;grid-template-columns:120px 46px 1fr;gap:10px;align-items:center;font-size:12.5px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;"><b style="color:var(--navy);">🖼 クリエイティブ</b><span style="color:var(--purple);font-size:10px;font-weight:800;">5-5</span><span style="color:var(--ink2);">勝ち広告の分析＋<b>AI生成</b>（広告文・動画プロンプト）</span></div>
+        <div style="display:grid;grid-template-columns:120px 46px 1fr;gap:10px;align-items:center;font-size:12.5px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;border-left:3px solid var(--purple);"><b style="color:var(--navy);">✨ AI日次提案</b><span style="color:var(--purple);font-size:10px;font-weight:800;">5-3</span><span style="color:var(--ink2);">毎朝の打ち手。<b>承認を押すだけ</b> ★毎日見る</span></div>
+        <div style="display:grid;grid-template-columns:120px 46px 1fr;gap:10px;align-items:center;font-size:12.5px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;"><b style="color:var(--navy);">📝 計測基盤</b><span style="color:var(--purple);font-size:10px;font-weight:800;">5-6</span><span style="color:var(--ink2);">土台（UTM・店舗判定・きっかけ記録）が効いているか</span></div>
+        <div style="display:grid;grid-template-columns:120px 46px 1fr;gap:10px;align-items:center;font-size:12.5px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;border-left:3px solid var(--green);"><b style="color:var(--navy);">📉 PL連携</b><span style="color:var(--purple);font-size:10px;font-weight:800;">6章</span><span style="color:var(--ink2);">広告費→入会→<b>店舗別PL（＝儲け）→黒字化</b>まで一気通貫</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 仕組み -->
+  <section>
+    <div class="sh"><div class="sn">3</div><div><h2>仕組み（かんたん版）</h2><div class="en">HOW IT WORKS</div></div></div>
+    <div class="flow">
+      <div class="fb"><div class="ic">📢</div><div class="t">広告</div><div class="d">Google・Meta</div></div>
+      <div class="fb auto"><div class="ic">🤖</div><div class="t">自動で集計</div><div class="d">どの店に何人・いくらで来たかを毎日計算</div></div>
+      <div class="fb"><div class="ic">📊</div><div class="t">この画面</div><div class="d">店舗別CPAを表示</div></div>
+      <div class="fb"><div class="ic">✅</div><div class="t">あなた</div><div class="d">提案を見て承認</div></div>
+    </div>
+    <div class="autotag">← この部分（集計・提案づくり）は全部システムが自動でやります →</div>
+  </section>
+
+  <!-- 4. 今とこれから -->
+  <section>
+    <div class="sh"><div class="sn">4</div><div><h2>今と、これから</h2><div class="en">NOW &amp; NEXT</div></div></div>
+    <div class="nf">
+      <div class="nfc now">
+        <div class="h">🧪 今（デモ段階）</div>
+        <ul>
+          <li>表示中の数字は<b>ダミー（サンプル）</b>。動きを体験するためのものです</li>
+          <li>「ダッシュボードを見る」をダブルクリックで開きます</li>
+          <li>画面右上に「MOCKUP／ダミー」と表示されます</li>
+        </ul>
+      </div>
+      <div class="nfc future">
+        <div class="h">🚀 これから（本番）</div>
+        <ul>
+          <li>認証がつながると<b>本物の数字</b>を表示（操作は同じ）</li>
+          <li><b>毎朝自動で更新</b>。ダブルクリックも不要に</li>
+          <li>いつもの<b>PL管理ダッシュボードの中に統合</b>＝ログインして見るだけ</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout">🎯 最終的には <b>「いつものダッシュボードを開くだけで、店舗別のCPAと今日の打ち手が並んでいる」</b> 状態になります。今はその完成形を、ダミーデータで先に体験していただいています。</div>
+  </section>
+
+  <div class="foot">
+    広告運用コントロールセンター 使い方ガイド ／ High Altitude Management株式会社 御中 ／ 制作：株式会社斗（hishaku）<br>
+    ※ 現在はダミーデータのデモ段階です。
+  </div>
+</div>
+</body>
+</html>

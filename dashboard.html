@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>広告運用コントロールセンター（DB接続版）｜High-Alti 店舗別CPA最適化（要件定義REQ-2026-002準拠）</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#07111F; --bg1:#0B1628; --bg2:#0E1B2E;
+  --panel:rgba(255,255,255,.035); --panel-2:rgba(255,255,255,.05);
+  --line:rgba(148,163,184,.14); --line-strong:rgba(148,163,184,.24);
+  --blue:#3b82f6; --blue-2:#2563eb; --cyan:#22d3ee; --lime:#a3e635;
+  --green:#22c55e; --orange:#f59e0b; --red:#ef4444; --purple:#a78bfa;
+  --ink:#e6edf6; --muted:#8296b1; --muted-2:#5f728c;
+  --glow:0 0 0 1px rgba(34,211,238,.15),0 8px 30px rgba(2,10,20,.5);
+  --sans:'Noto Sans JP',-apple-system,BlinkMacSystemFont,'Hiragino Kaku Gothic ProN',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);color:var(--ink);
+  background:radial-gradient(1200px 700px at 82% -8%,rgba(37,99,235,.18),transparent 55%),radial-gradient(900px 600px at 8% 110%,rgba(34,211,238,.10),transparent 55%),linear-gradient(180deg,var(--bg1),var(--bg0));
+  min-height:100vh;-webkit-font-smoothing:antialiased;letter-spacing:.01em;}
+::-webkit-scrollbar{width:10px;height:10px;}::-webkit-scrollbar-thumb{background:rgba(148,163,184,.22);border-radius:20px;}
+a{color:inherit;text-decoration:none;}
+.app{display:grid;grid-template-columns:236px 1fr;min-height:100vh;}
+
+/* SIDEBAR */
+.side{border-right:1px solid var(--line);background:rgba(6,14,26,.55);padding:22px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;}
+.brand{display:flex;align-items:center;gap:11px;padding:6px 8px 22px;}
+.brand .mark{width:38px;height:38px;border-radius:10px;flex:none;position:relative;background:#567FC0;box-shadow:0 0 18px rgba(86,127,192,.45);display:grid;place-items:center;}
+.brand .mark svg{width:27px;height:18px;}
+.brand .mark::after{content:"";position:absolute;inset:0;border-radius:10px;border:1px solid rgba(255,255,255,.25);}
+.brand .name{font-weight:900;font-size:15px;line-height:1.2;}
+.brand .name small{display:block;font-size:9.5px;color:var(--muted);font-weight:700;letter-spacing:.18em;margin-top:3px;}
+.nav{display:flex;flex-direction:column;gap:3px;margin-top:6px;}
+.nav .lbl{font-size:9.5px;letter-spacing:.2em;color:var(--muted-2);font-weight:700;padding:14px 10px 6px;}
+.nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;font-size:13px;color:var(--muted);font-weight:500;cursor:pointer;transition:.16s;}
+.nav a:hover{background:var(--panel);color:var(--ink);}
+.nav a.on{background:linear-gradient(90deg,rgba(37,99,235,.22),rgba(34,211,238,.06));color:#fff;box-shadow:inset 0 0 0 1px rgba(34,211,238,.25);}
+.nav a.on .ic{color:var(--cyan);}
+.nav .ic{width:17px;height:17px;flex:none;color:var(--muted-2);}
+.nav a .rq{margin-left:auto;font-size:8.5px;font-weight:800;color:var(--muted-2);letter-spacing:.03em;}
+.nav a.on .rq{color:var(--cyan);}
+.side .who{margin-top:auto;display:flex;align-items:center;gap:11px;padding:12px;border-radius:11px;background:var(--panel);border:1px solid var(--line);}
+.side .who .av{width:34px;height:34px;border-radius:50%;flex:none;background:linear-gradient(135deg,#334155,#0f172a);display:grid;place-items:center;font-weight:800;font-size:13px;color:#cbd5e1;position:relative;}
+.side .who .av::after{content:"";position:absolute;right:-1px;bottom:-1px;width:10px;height:10px;border-radius:50%;background:var(--green);border:2px solid var(--bg1);}
+.side .who .t{font-size:12px;font-weight:700;}.side .who .s{font-size:10px;color:var(--green);font-weight:700;margin-top:2px;}
+
+/* MAIN */
+.main{padding:22px 26px 60px;min-width:0;}
+.head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.head .ttl h1{font-size:22px;font-weight:900;display:flex;align-items:center;gap:13px;flex-wrap:wrap;}
+.live{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--green);padding:4px 10px;border-radius:20px;background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.3);}
+.live .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.8s infinite;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.55);}70%{box-shadow:0 0 0 7px rgba(34,197,94,0);}100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}}
+.head .ttl p{color:var(--muted);font-size:12.5px;margin-top:8px;}
+.head .tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.pill{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);padding:9px 13px;border-radius:9px;background:var(--panel);border:1px solid var(--line);cursor:pointer;transition:.15s;}
+.pill:hover{border-color:var(--line-strong);background:var(--panel-2);}
+.pill .ic{width:15px;height:15px;color:var(--muted);}
+.btn{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;cursor:pointer;padding:10px 15px;border-radius:9px;border:1px solid transparent;transition:.15s;}
+.btn.ghost{background:var(--panel);border-color:var(--line);color:var(--ink);}.btn.ghost:hover{background:var(--panel-2);}
+.btn.pri{background:linear-gradient(135deg,var(--blue-2),var(--blue));color:#fff;box-shadow:0 6px 18px rgba(37,99,235,.35);}.btn.pri:hover{filter:brightness(1.08);}
+.btn.mini{padding:6px 11px;font-size:11px;}
+.btn.ok{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.35);color:var(--green);}
+.btn.no{background:var(--panel);border-color:var(--line);color:var(--muted);}
+.btn .ic{width:15px;height:15px;}
+.badge{position:relative;}.badge::after{content:"";position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--orange);box-shadow:0 0 8px var(--orange);}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--glow);}
+.panel .ph{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+.panel .ph .hl{display:flex;align-items:center;gap:9px;min-width:0;}
+.panel .ph h2{font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:9px;}
+.panel .ph .sub{font-size:11px;color:var(--muted);font-weight:500;}
+.req{font-size:9px;font-weight:800;letter-spacing:.04em;color:var(--purple);background:rgba(167,139,250,.13);border:1px solid rgba(167,139,250,.3);padding:2px 8px;border-radius:6px;white-space:nowrap;}
+.chip{font-size:10px;font-weight:800;letter-spacing:.06em;padding:3px 9px;border-radius:20px;}
+.chip.g{color:var(--green);background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.28);}
+.chip.o{color:var(--orange);background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);}
+.chip.r{color:var(--red);background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.28);}
+.chip.b{color:var(--cyan);background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.28);}
+.hicon{width:16px;height:16px;color:var(--cyan);}
+
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:22px;}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:15px 16px;position:relative;overflow:hidden;}
+.kpi::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));opacity:.55;}
+.kpi .k{font-size:10.5px;color:var(--muted);font-weight:700;letter-spacing:.08em;}
+.kpi .v{font-size:23px;font-weight:900;margin-top:9px;font-variant-numeric:tabular-nums;}
+.kpi .v small{font-size:12px;font-weight:800;color:var(--muted);margin-left:2px;}
+.kpi .foot{display:flex;align-items:center;justify-content:space-between;margin-top:11px;}
+.delta{font-size:11px;font-weight:800;display:inline-flex;align-items:center;gap:3px;}
+.delta.up,.delta.good{color:var(--green);}.delta.down,.delta.bad{color:var(--red);}
+.spark{width:62px;height:24px;}
+
+.grid{display:grid;grid-template-columns:1fr 340px;gap:18px;margin-top:18px;align-items:start;}
+.col{display:flex;flex-direction:column;gap:18px;min-width:0;}
+
+/* tabs */
+.tabs{display:flex;gap:4px;background:var(--bg0);padding:3px;border-radius:8px;border:1px solid var(--line);}
+.tabs button{font-family:inherit;font-size:11px;font-weight:700;color:var(--muted);background:none;border:none;padding:6px 13px;border-radius:6px;cursor:pointer;transition:.15s;}
+.tabs button.on{background:var(--panel-2);color:#fff;box-shadow:inset 0 0 0 1px var(--line-strong);}
+.chartwrap{padding:16px 18px 8px;position:relative;}
+.legend{display:flex;gap:18px;flex-wrap:wrap;padding:2px 18px 16px;}
+.legend span{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);font-weight:600;}
+.legend i{width:14px;height:3px;border-radius:2px;display:inline-block;}
+.tip{position:absolute;pointer-events:none;background:#04101d;border:1px solid var(--line-strong);border-radius:9px;padding:9px 11px;font-size:11px;box-shadow:0 10px 24px rgba(0,0,0,.5);opacity:0;transition:opacity .12s;z-index:5;min-width:130px;}
+.tip b{font-size:11px;color:var(--muted);font-weight:700;}
+.tip .r{display:flex;justify-content:space-between;gap:14px;margin-top:5px;font-weight:700;}
+
+/* store table */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+.tbl thead th{font-size:10.5px;color:var(--muted);font-weight:700;text-align:right;padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;user-select:none;}
+.tbl thead th:first-child{text-align:left;}
+.tbl thead th.sortable:hover{color:var(--ink);}
+.tbl tbody td{padding:12px 14px;text-align:right;border-bottom:1px solid rgba(148,163,184,.07);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.tbl tbody td:first-child{text-align:left;font-weight:700;}
+.tbl tbody tr{transition:.12s;}.tbl tbody tr:hover{background:rgba(34,211,238,.045);}
+.store-nm{display:flex;align-items:center;gap:10px;}
+.store-nm .r{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:11px;font-weight:800;flex:none;background:var(--panel-2);border:1px solid var(--line);color:var(--cyan);}
+.split{display:inline-flex;height:7px;width:78px;border-radius:4px;overflow:hidden;background:rgba(148,163,184,.14);vertical-align:middle;}
+.split i{height:100%;display:block;}
+.st{font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;display:inline-block;}
+.st.g{color:var(--green);background:rgba(34,197,94,.12);}.st.o{color:var(--orange);background:rgba(245,158,11,.13);}.st.r{color:var(--red);background:rgba(239,68,68,.13);}
+.mini{font-size:10px;color:var(--muted);font-weight:600;}
+
+/* ranking */
+.rank{padding:8px 8px 14px;}
+.rk-h{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--muted);padding:10px 14px 6px;display:flex;align-items:center;gap:7px;}
+.rk{display:flex;align-items:center;gap:12px;padding:9px 14px;border-radius:9px;transition:.12s;}
+.rk:hover{background:var(--panel);}
+.rk .no{width:20px;font-weight:900;font-size:12px;color:var(--muted-2);text-align:center;flex:none;}
+.rk .mg{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-weight:900;font-size:10px;flex:none;}
+.rk .mg.gg{background:rgba(66,133,244,.16);color:#8ab4f8;}.rk .mg.me{background:rgba(24,119,242,.16);color:#7cb0ff;}
+.rk .info{min-width:0;flex:1;}
+.rk .info .t{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rk .info .s{font-size:10px;color:var(--muted);margin-top:2px;}
+.rk .cpa{font-size:13px;font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap;}
+
+/* funnel */
+.funnel{padding:18px;display:flex;flex-direction:column;gap:9px;}
+.frow{display:grid;grid-template-columns:150px 1fr auto;align-items:center;gap:14px;}
+.frow .fl{font-size:12px;font-weight:700;display:flex;align-items:center;gap:9px;}
+.frow .fl .n{font-size:10px;color:var(--muted-2);font-weight:800;}
+.fbar{height:30px;border-radius:8px;background:linear-gradient(90deg,rgba(37,99,235,.9),rgba(34,211,238,.85));position:relative;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);transition:width 1s cubic-bezier(.2,.7,.2,1);}
+.fbar.warn{background:linear-gradient(90deg,rgba(245,158,11,.9),rgba(239,68,68,.8));}
+.fval{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;min-width:118px;text-align:right;}
+.fval small{color:var(--muted);font-weight:600;font-size:10.5px;margin-left:5px;}
+.fdrop{font-size:10.5px;color:var(--red);font-weight:800;background:rgba(239,68,68,.1);padding:2px 7px;border-radius:6px;}
+/* 動線改善提案 5-4 */
+.improve{margin:2px 18px 18px;padding:14px 16px;border-radius:11px;background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(239,68,68,.05));border:1px solid rgba(245,158,11,.25);}
+.improve .ih{font-size:11.5px;font-weight:800;color:var(--orange);display:flex;align-items:center;gap:8px;}
+.improve p{font-size:12px;line-height:1.7;color:var(--ink);margin-top:8px;}
+.improve p b{color:var(--orange);}
+.sugg{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px;}
+.sugg span{font-size:11px;font-weight:700;padding:6px 12px;border-radius:8px;background:var(--bg0);border:1px solid var(--line);display:inline-flex;align-items:center;gap:6px;}
+.sugg span::before{content:"→";color:var(--cyan);font-weight:900;}
+.improve .note{font-size:10px;color:var(--muted);margin-top:10px;}
+
+/* media */
+.media{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:18px;}
+.mcard{background:var(--bg0);border:1px solid var(--line);border-radius:12px;padding:15px;}
+.mcard .mh{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.mcard .mh .nm{display:flex;align-items:center;gap:9px;font-weight:800;font-size:13px;}
+.mlogo{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-weight:900;font-size:12px;flex:none;}
+.mlogo.gg{background:rgba(66,133,244,.16);color:#8ab4f8;border:1px solid rgba(66,133,244,.35);}
+.mlogo.me{background:rgba(24,119,242,.16);color:#7cb0ff;border:1px solid rgba(24,119,242,.35);}
+.mstats{display:grid;grid-template-columns:1fr 1fr;gap:10px 8px;margin-top:14px;}
+.mstats .s .l{font-size:10px;color:var(--muted);font-weight:700;}
+.mstats .s .n{font-size:15px;font-weight:900;margin-top:3px;font-variant-numeric:tabular-nums;}
+
+/* creative + generate (5-5) */
+.cre{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:18px;}
+.ccard{background:var(--bg0);border:1px solid var(--line);border-radius:11px;overflow:hidden;transition:.16s;}
+.ccard:hover{border-color:var(--line-strong);transform:translateY(-2px);}
+.cthumb{height:92px;position:relative;display:grid;place-items:center;overflow:hidden;}
+.cthumb .lab{position:absolute;top:8px;left:8px;font-size:9px;font-weight:800;padding:3px 8px;border-radius:20px;z-index:2;}
+.cthumb .txt{position:relative;z-index:2;font-size:12px;font-weight:900;color:#fff;text-align:center;padding:0 12px;line-height:1.4;text-shadow:0 2px 8px rgba(0,0,0,.5);}
+.cbody{padding:11px 12px;}
+.cbody .cm{display:flex;justify-content:space-between;font-size:10.5px;margin-top:5px;}
+.cbody .cm .l{color:var(--muted);font-weight:600;}.cbody .cm .v{font-weight:800;font-variant-numeric:tabular-nums;}
+.fatigue{height:5px;border-radius:3px;background:rgba(148,163,184,.16);margin-top:10px;overflow:hidden;}
+.fatigue i{display:block;height:100%;}
+.gen{padding:18px;display:none;}
+.gen.on{display:block;}
+.gen .gcols{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;}
+.gen .gh{font-size:11px;font-weight:800;color:var(--cyan);display:flex;align-items:center;gap:7px;margin-bottom:11px;}
+.copyline{background:var(--bg0);border:1px solid var(--line);border-left:3px solid var(--cyan);border-radius:9px;padding:11px 13px;margin-bottom:9px;}
+.copyline .h{font-size:12.5px;font-weight:800;line-height:1.5;}
+.copyline .d{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.6;}
+.promptbox{background:#050f1c;border:1px solid var(--line);border-radius:9px;padding:13px;font-size:11px;line-height:1.75;color:#a7bdda;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+.gtoggle{display:flex;gap:8px;margin-top:14px;}
+.gtoggle .opt{flex:1;background:var(--bg0);border:1px solid var(--line);border-radius:10px;padding:11px 12px;cursor:pointer;transition:.15s;}
+.gtoggle .opt.on{border-color:var(--cyan);box-shadow:inset 0 0 0 1px var(--cyan);}
+.gtoggle .opt .t{font-size:12px;font-weight:800;}
+.gtoggle .opt .c{font-size:10.5px;color:var(--muted);margin-top:4px;}
+.gtoggle .opt .c b{color:var(--lime);}
+
+/* RIGHT: AI report 5-3 */
+.ai{position:relative;overflow:hidden;}
+.ai::before{content:"";position:absolute;inset:0;background:radial-gradient(400px 200px at 90% -10%,rgba(34,211,238,.14),transparent 60%);pointer-events:none;}
+.analyzing{display:inline-flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;color:var(--cyan);}
+.analyzing .rot{width:13px;height:13px;border:2px solid rgba(34,211,238,.3);border-top-color:var(--cyan);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.aisum{margin:14px 16px 2px;padding:12px 14px;border-radius:11px;background:var(--bg0);border:1px solid var(--line);}
+.aisum .l{font-size:10px;color:var(--muted);font-weight:700;}
+.aisum p{font-size:12px;line-height:1.7;margin-top:6px;}
+.aisum p b{color:#fff;}
+.effect{margin:12px 16px 2px;padding:13px 15px;border-radius:11px;background:linear-gradient(135deg,rgba(34,197,94,.14),rgba(34,211,238,.06));border:1px solid rgba(34,197,94,.28);display:flex;align-items:center;justify-content:space-between;}
+.effect .l{font-size:10.5px;color:var(--muted);font-weight:700;}
+.effect .n{font-size:24px;font-weight:900;color:var(--green);}
+.prop{margin:12px 16px;padding:13px 14px;border-radius:11px;background:var(--bg0);border:1px solid var(--line);border-left:3px solid var(--cyan);}
+.prop .tag{font-size:9.5px;font-weight:800;color:var(--cyan);display:flex;justify-content:space-between;align-items:center;}
+.prop .tag .wait{color:var(--orange);background:rgba(245,158,11,.12);padding:2px 7px;border-radius:5px;}
+.prop p{font-size:12px;line-height:1.7;margin-top:8px;}
+.prop p b{color:#fff;}
+.prop .act{margin-top:11px;display:flex;gap:8px;}
+.human{margin:0 16px 14px;font-size:10.5px;color:var(--muted);line-height:1.6;display:flex;gap:8px;align-items:flex-start;}
+.human svg{width:14px;height:14px;color:var(--cyan);flex:none;margin-top:1px;}
+
+/* feed */
+.feed{padding:6px 0 8px;}
+.fitem{display:flex;gap:12px;padding:11px 16px;}
+.fitem:hover{background:var(--panel);}
+.fitem .tl{display:flex;flex-direction:column;align-items:center;flex:none;}
+.fitem .fdot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex:none;}
+.fitem .fdot.ai{background:var(--cyan);}.fitem .fdot.hp{background:var(--blue);}.fitem .fdot.hc{background:var(--lime);}
+.fitem .fline{width:1px;flex:1;background:var(--line);margin-top:4px;}
+.fitem:last-child .fline{display:none;}
+.fitem .fc{min-width:0;}
+.fitem .fc .ft{font-size:12px;font-weight:600;line-height:1.55;}.fitem .fc .ft b{font-weight:800;}
+.fitem .fc .fm{font-size:10px;color:var(--muted-2);font-weight:700;margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;}
+.fsrc{font-size:9px;font-weight:800;padding:1px 6px;border-radius:5px;}
+.fsrc.ai{color:var(--cyan);background:rgba(34,211,238,.1);}.fsrc.hp{color:#8ab4f8;background:rgba(66,133,244,.1);}.fsrc.hc{color:var(--lime);background:rgba(163,230,53,.1);}
+
+/* measure 5-6 */
+.meas{padding:14px 16px;}
+.meas .row{display:flex;align-items:center;gap:12px;padding:10px 0;}
+.meas .row+.row{border-top:1px solid rgba(148,163,184,.08);}
+.meas .row .ic{width:28px;height:28px;border-radius:8px;flex:none;display:grid;place-items:center;background:var(--panel-2);border:1px solid var(--line);}
+.meas .row .ic svg{width:15px;height:15px;color:var(--cyan);}
+.meas .row .t{font-size:12px;font-weight:700;}.meas .row .s{font-size:10.5px;color:var(--muted);margin-top:2px;}
+.meas .row .stt{margin-left:auto;font-size:9.5px;font-weight:800;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+.meas .row .stt.done{color:var(--green);background:rgba(34,197,94,.12);}
+.meas .row .stt.prog{color:var(--cyan);background:rgba(34,211,238,.12);}
+.meas .row .stt.plan{color:var(--muted);background:rgba(148,163,184,.1);}
+
+/* PL */
+.pl{padding:16px 18px;}
+.pl .layer{display:flex;align-items:center;gap:13px;padding:11px 0;}
+.pl .layer+.layer{border-top:1px solid rgba(148,163,184,.08);}
+.pl .layer .ln{width:26px;height:26px;border-radius:7px;flex:none;display:grid;place-items:center;font-size:11px;font-weight:800;background:var(--panel-2);border:1px solid var(--line);color:var(--cyan);}
+.pl .layer .lt{font-size:12px;font-weight:700;}.pl .layer .ls{font-size:10.5px;color:var(--muted);margin-top:2px;}
+.pl .layer .lv{margin-left:auto;font-size:13px;font-weight:900;font-variant-numeric:tabular-nums;}
+.pl .note{margin-top:12px;font-size:11px;color:var(--muted);line-height:1.7;background:var(--bg0);border:1px solid var(--line);border-radius:9px;padding:11px 13px;}
+.pl .note b{color:var(--cyan);}
+
+.wm{margin-top:26px;text-align:center;font-size:10.5px;color:var(--muted-2);letter-spacing:.08em;}
+.wm b{color:var(--muted);}
+.mockflag{position:fixed;bottom:14px;left:14px;z-index:40;font-size:10px;font-weight:800;letter-spacing:.1em;color:#04121f;background:linear-gradient(135deg,var(--lime),var(--cyan));padding:6px 12px;border-radius:20px;box-shadow:0 6px 18px rgba(0,0,0,.4);}
+.modal{position:fixed;inset:0;z-index:60;display:none;place-items:center;background:rgba(3,10,20,.7);backdrop-filter:blur(3px);padding:20px;}
+.modal.on{display:grid;}
+.modal .box{background:var(--bg2);border:1px solid var(--line-strong);border-radius:16px;max-width:440px;width:100%;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.6);}
+.modal .box h3{font-size:16px;font-weight:900;}
+.modal .box .mrow{display:flex;justify-content:space-between;font-size:12.5px;padding:10px 0;border-bottom:1px solid var(--line);}
+.modal .box .mrow b{font-weight:800;}
+.modal .box .mact{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+svg{display:block;}
+/* intro */
+.intro{background:linear-gradient(135deg,rgba(37,99,235,.15),rgba(34,211,238,.05));border:1px solid rgba(34,211,238,.24);border-radius:14px;padding:18px 22px;margin-top:20px;position:relative;box-shadow:var(--glow);}
+.intro h2{font-size:15px;font-weight:900;display:flex;align-items:center;gap:10px;}
+.intro .tag{font-size:9.5px;font-weight:800;color:#04121f;background:linear-gradient(135deg,var(--lime),var(--cyan));padding:3px 9px;border-radius:6px;letter-spacing:.08em;}
+.intro p{font-size:12.5px;line-height:1.9;color:var(--ink);margin-top:11px;max-width:940px;}
+.intro p b{color:var(--cyan);}
+.intro .fmap{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+.intro .fmap span{font-size:11px;font-weight:700;padding:6px 11px;border-radius:8px;background:var(--bg0);border:1px solid var(--line);}
+.intro .fmap span b{color:var(--purple);font-weight:800;margin-right:5px;}
+.intro .meta{margin-top:13px;font-size:11px;color:var(--muted);display:flex;gap:18px;flex-wrap:wrap;align-items:center;}
+.intro .meta b{color:var(--ink);}
+.intro .x{position:absolute;top:12px;right:14px;cursor:pointer;color:var(--muted);font-size:20px;line-height:1;background:none;border:none;transition:.15s;}
+.intro .x:hover{color:var(--ink);}
+@media(max-width:1180px){.kpis{grid-template-columns:repeat(3,1fr);}.grid{grid-template-columns:1fr;}.cre{grid-template-columns:repeat(2,1fr);}.gen .gcols{grid-template-columns:1fr;}}
+@media(max-width:820px){.app{grid-template-columns:1fr;}.side{position:fixed;left:-260px;transition:.2s;z-index:50;width:236px;}.side.open{left:0;}.menutog{display:inline-flex!important;}.kpis{grid-template-columns:repeat(2,1fr);}.media{grid-template-columns:1fr;}.tbl-scroll{overflow-x:auto;}.tbl{min-width:640px;}.frow{grid-template-columns:110px 1fr;}.frow .fval{grid-column:2;text-align:left;min-width:0;}}
+.menutog{display:none;}
+@media(max-width:520px){.kpis{grid-template-columns:1fr 1fr;}.cre{grid-template-columns:1fr;}.main{padding:16px 14px 60px;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side">
+    <div class="brand"><div class="mark"><svg viewBox="0 0 44 28"><path d="M3 23 C10 22 12 9 16 12 C19 14 21 14.2 22 14.2 C23 14.2 25 14 28 12 C32 9 34 22 41 23 Z" fill="#fff"/><path d="M8.5 21l3.5-1.8M35.5 21L32 19.2" stroke="#567FC0" stroke-width="1.3" stroke-linecap="round"/></svg></div><div class="name">ハイアルチ<small>駅前高地トレーニング</small></div></div>
+    <nav class="nav">
+      <span class="lbl">運用</span>
+      <a class="on"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Overview</a>
+      <a><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>店舗別CPA<span class="rq">5-2</span></a>
+      <a><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>媒体・広告別<span class="rq">5-1</span></a>
+      <a><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16l-6 8v6l-4 2v-8z"/></svg>動線分析<span class="rq">5-4</span></a>
+      <a><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M3 17l6-5 4 3 5-6"/></svg>クリエイティブ<span class="rq">5-5</span></a>
+      <span class="lbl">インテリジェンス</span>
+      <a><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="4"/></svg>AI日次提案<span class="rq">5-3</span></a>
+      <a><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"/><path d="M18 2l4 4-8 8h-4v-4z"/></svg>計測基盤<span class="rq">5-6</span></a>
+      <a><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 13l3 3 7-8"/></svg>PL連携<span class="rq">6章</span></a>
+    </nav>
+    <div class="who"><div class="av">斗</div><div><div class="t">株式会社斗 運用</div><div class="s">● 自動監視ON</div></div></div>
+  </aside>
+
+  <main class="main">
+    <section class="intro" id="intro">
+      <button class="x" title="閉じる" onclick="document.getElementById('intro').style.display='none'">×</button>
+      <h2>📊 このダッシュボードについて <span class="tag">MOCKUP ／ 完成イメージ</span></h2>
+      <p>広告費の無駄を止めて <b>来期の通期黒字化</b> を実現する「<b>広告自動化・CPA最適化システム</b>」の <b>完成イメージ（試作画面）</b> です。<br>
+        7店舗 × Google／Meta の広告成果を <b>毎日自動で見える化</b> し、<b>AIが「止める・寄せる」打ち手を提案</b> → 担当者が承認して予算を寄せ直します。広告費 → 体験 → 入会 → <b>店舗別PL → 黒字化</b> まで一気通貫で追えるのが最大の特長です。下の画面は、その運用イメージを実際の操作感で確認いただくためのものです。</p>
+      <div class="fmap">
+        <span><b>5-1</b>広告データ自動収集</span>
+        <span><b>5-2</b>店舗別CPA見える化</span>
+        <span><b>5-3</b>AI日次レポート＋提案</span>
+        <span><b>5-4</b>動線設計アドバイス</span>
+        <span><b>5-5</b>AIクリエイティブ生成</span>
+        <span><b>5-6</b>計測基盤（UTM）</span>
+      </div>
+      <div class="meta"><span>提案書：<b>SYS-2026-002</b></span><span>要件定義：<b>REQ-2026-002</b></span><span>完成予定：<b>2026年9月末</b></span><span style="color:var(--orange);font-weight:700">※ 数値は output/data.json（DB集計・python export_dashboard.py で更新）を表示</span></div>
+    </section>
+    <div class="head">
+      <div class="ttl">
+        <h1><span class="pill menutog" onclick="document.getElementById('side').classList.toggle('open')" style="padding:7px 10px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></span>広告運用コントロールセンター<span class="live"><span class="dot"></span>LIVE</span></h1>
+        <p>要件定義 REQ-2026-002 準拠 ／ 全7店舗・Google＋Meta のCPAを毎日自動で見える化 → 提案 → 予算の寄せ直し。目標：広告費 年間▲1,000万円（通期黒字化）</p>
+      </div>
+      <div class="tools">
+        <span class="pill"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>2026/7/1 – 7/21</span>
+        <span class="pill badge"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
+        <button class="btn ghost" onclick="openModal('report')"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>日次レポート</button>
+        <button class="btn pri" onclick="openModal('camp')"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>施策を追加</button>
+      </div>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="grid">
+      <div class="col">
+        <!-- 5-2 推移 -->
+        <section class="panel">
+          <div class="ph"><div class="hl"><h2><svg class="hicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 2 5-7"/></svg>パフォーマンス推移</h2><span class="req">要件 5-2</span></div>
+            <div class="tabs" id="trendtabs"><button class="on" data-r="d">日次</button><button data-r="w">週次</button><button data-r="m">月次</button></div></div>
+          <div class="chartwrap" id="chartwrap"><svg id="chart" viewBox="0 0 760 250" preserveAspectRatio="none" style="width:100%;height:250px"></svg><div class="tip" id="tip"></div></div>
+          <div class="legend"><span><i style="background:var(--cyan)"></i>広告費</span><span><i style="background:var(--lime)"></i>体験申込</span><span><i style="background:var(--orange)"></i>体験CPA</span><span><i style="background:var(--muted-2);height:0;border-top:2px dashed var(--muted)"></i>施策マーカー</span></div>
+        </section>
+
+        <!-- 5-2 店舗別CPAマトリクス -->
+        <section class="panel">
+          <div class="ph"><div class="hl"><h2><svg class="hicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>店舗別CPAマトリクス <span class="sub">7店舗横断・動線再構成で店舗判定</span></h2><span class="req">要件 5-2 ★肝</span></div><span class="chip b">クリックで並べ替え</span></div>
+          <div class="tbl-scroll"><table class="tbl" id="stbl">
+            <thead><tr><th data-k="name">店舗</th><th class="sortable" data-k="spend">広告費</th><th class="sortable" data-k="taiken">体験</th><th class="sortable" data-k="nyukai">入会</th><th class="sortable" data-k="tcpa">体験CPA</th><th class="sortable" data-k="ncpa">入会CPA</th><th class="sortable" data-k="cvr">体験→入会</th><th data-k="media">媒体(G/M)</th><th data-k="dod">前日比</th><th data-k="status">判定</th></tr></thead>
+            <tbody id="stbody"></tbody></table></div>
+        </section>
+
+        <!-- 5-1 広告別ランキング -->
+        <section class="panel">
+          <div class="ph"><div class="hl"><h2><svg class="hicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M12 20V4M20 20v-6"/></svg>媒体・広告別ランキング <span class="sub">キャンペーン別・広告別に日次蓄積</span></h2><span class="req">要件 5-1</span></div></div>
+          <div class="rank" id="rankGood"></div>
+          <div class="rank" id="rankBad" style="border-top:1px solid var(--line)"></div>
+        </section>
+
+        <!-- 5-4 動線ファネル + 改善提案 -->
+        <section class="panel">
+          <div class="ph"><div class="hl"><h2><svg class="hicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16l-6 8v6l-4 2v-8z"/></svg>動線ファネル・設計アドバイス</h2><span class="req">要件 5-4</span></div><span class="chip o">離脱ポイント検出</span></div>
+          <div class="funnel" id="funnel"></div>
+          <div class="improve">
+            <div class="ih"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 0-4 12c1 1 1 2 1 3h6c0-1 0-2 1-3a7 7 0 0 0-4-12z"/><path d="M9 21h6"/></svg>最大の離脱：店舗ページ → hacomono体験予約（−95%）</div>
+            <p>広告からLPまでは到達しても、<b>店舗ページ→体験予約</b>で大きく離脱しています。動線が長い（広告→ペライチLP→店舗一覧→HP店舗一覧→hacomono）ことが原因。以下の改善で予約率の底上げを提案します：</p>
+            <div class="sugg"><span>LINE導線化</span><span>体験予約 1枚入力フォーム</span><span>Health Step 体験予約の活用</span><span>LP 店舗導線の改善</span></div>
+            <div class="note">※本項は「分析に基づく改善提案」まで。LP／フォームの実装可否・範囲は別途ご相談（要件定義 5-4）。</div>
+          </div>
+        </section>
+
+        <!-- 5-1 媒体別 -->
+        <section class="panel">
+          <div class="ph"><div class="hl"><h2><svg class="hicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>媒体別パフォーマンス</h2><span class="req">要件 5-1</span></div><span class="sub">2026/7/1–7/21</span></div>
+          <div class="media">
+            <div class="mcard"><div class="mh"><div class="nm"><span class="mlogo gg">G</span>Google 広告</div><span class="st g">良好</span></div>
+              <div class="mstats"><div class="s"><div class="l">広告費</div><div class="n">¥1,780,000</div></div><div class="s"><div class="l">体験申込</div><div class="n">82件</div></div><div class="s"><div class="l">体験CPA</div><div class="n">¥21,707</div></div><div class="s"><div class="l">入会</div><div class="n">35件</div></div></div></div>
+            <div class="mcard"><div class="mh"><div class="nm"><span class="mlogo me">M</span>Meta 広告</div><span class="st o">注意</span></div>
+              <div class="mstats"><div class="s"><div class="l">広告費</div><div class="n">¥1,400,000</div></div><div class="s"><div class="l">体験申込</div><div class="n">60件</div></div><div class="s"><div class="l">体験CPA</div><div class="n">¥23,333</div></div><div class="s"><div class="l">入会</div><div class="n">23件</div></div></div></div>
+          </div>
+        </section>
+
+        <!-- 5-5 クリエイティブ 分析+生成 -->
+        <section class="panel">
+          <div class="ph"><div class="hl"><h2><svg class="hicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M3 15l5-4 4 3 4-5 5 6"/></svg>クリエイティブ</h2><span class="req">要件 5-5</span></div>
+            <div class="tabs" id="cretabs"><button class="on" data-t="analyze">分析</button><button data-t="gen">AI生成</button></div></div>
+          <div class="cre" id="cre"></div>
+          <div class="gen" id="gen">
+            <div class="gh"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="4"/></svg>勝ちパターン（動画「高地で変わる自分」CTR3.2%）から、次の一手を自動生成</div>
+            <div class="gcols">
+              <div>
+                <div style="font-size:10.5px;font-weight:800;color:var(--muted);margin-bottom:9px;">▶ 広告文案（3案）</div>
+                <div class="copyline"><div class="h">「1回の体験で、息が変わる。」</div><div class="d">高地環境の体感を主訴求。中目黒・下北沢の勝ち訴求を横展開。</div></div>
+                <div class="copyline"><div class="h">「週2回、30日で"上がらない息"へ。」</div><div class="d">継続×体力測定の数値変化。入会率が高い層に刺さる訴求。</div></div>
+                <div class="copyline"><div class="h">「ジム通いが続かなかった人ほど。」</div><div class="d">離脱経験者の再挑戦フック。産後・運動不足枠の置き換え候補。</div></div>
+              </div>
+              <div>
+                <div style="font-size:10.5px;font-weight:800;color:var(--muted);margin-bottom:9px;">▶ 動画生成プロンプト</div>
+                <div class="promptbox">高地トレーニング施設で、20〜40代女性が低酸素環境で軽い有酸素運動。<br>額に汗、呼吸に集中する表情のクローズアップ→数値が上がる体力測定モニター。<br>採光は自然光、色調はクール〜シアン。テロップ「息が、変わる。」<br>16:9 / 15秒 / 実写風 / BGMなし</div>
+                <div class="gtoggle">
+                  <div class="opt on"><div class="t">Seedance 高品質</div><div class="c">サロン動画レベル ／ <b>実費 約¥1万/本</b></div></div>
+                  <div class="opt"><div class="t">無料簡易生成</div><div class="c">標準品質 ／ <b>実費なし</b></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col">
+        <!-- 5-3 AI日次レポート＋予算提案（提案型・人が承認） -->
+        <section class="panel ai">
+          <div class="ph"><div class="hl"><h2><svg class="hicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>AI日次レポート＋予算提案</h2><span class="req">要件 5-3</span></div><span class="analyzing"><span class="rot"></span>分析中</span></div>
+          <div class="aisum"><div class="l">本日のサマリ（7/22 08:00 自動生成）</div><p>前日 体験 <b>7件</b>／入会 <b>2件</b>。全体の体験CPAは <b>¥20,300</b>（前日比 ▲8%）。<b>船橋・春日</b>の2店が全店平均を上回り要改善。</p></div>
+          <div class="effect"><div><div class="l">推定改善効果（提案を全て採用した場合）</div><div class="n" id="eff">+12.4%</div></div><svg width="52" height="30" viewBox="0 0 52 30"><path d="M2,26 L12,22 L22,23 L32,15 L42,12 L50,6" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <div class="prop"><div class="tag"><span>止める候補 ／ 予算再配分</span><span class="wait">承認待ち</span></div>
+            <p><b>船橋店 Meta</b> の体験CPAが全店平均の1.5倍（¥33,636）。予算を <b>▲30%</b> し <b>中目黒・下北沢</b>へ寄せると、全体の体験CPAが約 <b>▲9%</b> 改善する見込みです。</p>
+            <div class="act"><button class="btn ok mini" onclick="openModal('ai')">承認</button><button class="btn no mini">却下</button><button class="btn ghost mini" onclick="openModal('ai')">詳細</button></div></div>
+          <div class="prop"><div class="tag"><span>寄せる候補 ／ 入札調整</span><span class="wait">承認待ち</span></div>
+            <p><b>祖師ヶ谷大蔵 Google</b>「高地トレーニング 世田谷」のCPAが低め。入札 <b>+15%</b> で体験 <b>+3件/週</b> の見込み。</p>
+            <div class="act"><button class="btn ok mini">承認</button><button class="btn no mini">却下</button></div></div>
+          <div class="human"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>AIは<b style="color:#fff">提案まで</b>。実際の予算変更・配信停止は<b style="color:#fff">担当者の承認後</b>に行います（御社は提案を見て選ぶだけ）。</span></div>
+        </section>
+
+        <!-- 5-3 フィード -->
+        <section class="panel">
+          <div class="ph"><div class="hl"><h2><svg class="hicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>運用フィード</h2></div><span class="chip g">本日の打ち手 3</span></div>
+          <div class="feed" id="feed"></div>
+        </section>
+
+        <!-- 5-6 計測基盤 -->
+        <section class="panel">
+          <div class="ph"><div class="hl"><h2><svg class="hicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"/><path d="M18 2l4 4-8 8h-4v-4z"/></svg>計測基盤（土台）</h2><span class="req">要件 5-6</span></div></div>
+          <div class="meas">
+            <div class="row"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></div><div><div class="t">UTM統一付与</div><div class="s">店舗・媒体・キャンペーンを識別</div></div><span class="stt done">設計完了</span></div>
+            <div class="row"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16l-6 8v6l-4 2v-8z"/></svg></div><div><div class="t">店舗別 導線識別</div><div class="s">GA4×ペライチ×hacomono 突合</div></div><span class="stt prog">整備中</span></div>
+            <div class="row"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 3.08 5.18 2 2 0 0 1 5 3h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.34a2 2 0 0 1-.45 2.11L9 10.09a16 16 0 0 0 6 6l.72-1.72a2 2 0 0 1 2.11-.45c.74.34 1.53.57 2.34.7A2 2 0 0 1 22 16.92z"/></svg></div><div><div class="t">「きっかけ」記録</div><div class="s">電話・来店・紹介の非計測流入を補完</div></div><span class="stt plan">運用設計</span></div>
+          </div>
+        </section>
+
+        <!-- 6章 PL連携 -->
+        <section class="panel">
+          <div class="ph"><div class="hl"><h2><svg class="hicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 13l3 3 7-8"/></svg>PLダッシュボード連携</h2><span class="req">6章 統合</span></div></div>
+          <div class="pl">
+            <div class="layer"><div class="ln">1</div><div><div class="lt">広告費</div><div class="ls">媒体別・店舗別に自動取得</div></div><div class="lv">¥3.18M</div></div>
+            <div class="layer"><div class="ln">2</div><div><div class="lt">体験 → 入会</div><div class="ls">hacomono と自動突合</div></div><div class="lv">142 → 58</div></div>
+            <div class="layer"><div class="ln">3</div><div><div class="lt">店舗別PL（販促費）</div><div class="ls">既存ダッシュボードに反映</div></div><div class="lv">7店舗</div></div>
+            <div class="layer"><div class="ln">4</div><div><div class="lt">通期黒字化</div><div class="ls">広告効率→PLの効きを毎月確認</div></div><div class="lv" style="color:var(--green)">▲83万/月</div></div>
+            <div class="note">広告の投資対効果を <b>最終PL（黒字化）まで一気通貫</b> で追える構成。広告レポートだけを納品する会社との最大の違いです。</div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div class="wm">これは <b>提案用モックアップ（v2・要件定義REQ-2026-002準拠）</b> です（数値はダミー・実データ未接続）。 ｜ High Altitude Management株式会社 御中 ｜ 制作：株式会社斗（hishaku）</div>
+  </main>
+</div>
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="box" id="modalbox"></div></div>
+
+<script src="output/data.js"></script>
+<script>
+// データはDBから（python export_dashboard.py → output/data.json）
+let KPIS=[],STORES=[],DOD=[],RANK_GOOD=[],RANK_BAD=[],FUNNEL=[];
+const CRE=[
+  {t:'高地で変わる自分',lab:'急上昇',labc:'g',ctr:'3.2%',cvr:'5.1%',cpa:'¥18,200',fat:22,g:'linear-gradient(135deg,#0ea5e9,#22d3ee)'},
+  {t:'体験キャンペーン',lab:'検証中',labc:'b',ctr:'1.8%',cvr:'3.4%',cpa:'¥24,600',fat:52,g:'linear-gradient(135deg,#6366f1,#8b5cf6)'},
+  {t:'30日で体力測定',lab:'検証中',labc:'b',ctr:'2.4%',cvr:'4.0%',cpa:'¥21,100',fat:41,g:'linear-gradient(135deg,#0891b2,#0ea5e9)'},
+  {t:'産後・運動不足に',lab:'差し替え推奨',labc:'r',ctr:'0.9%',cvr:'1.2%',cpa:'¥48,900',fat:88,g:'linear-gradient(135deg,#475569,#334155)'},
+];
+const FEED=[
+  {src:'ai',t:'<b>船橋店 Meta</b> の体験CPA悪化を検知 → 予算再配分を<b>提案</b>（承認待ち）',m:['08:02','止める候補']},
+  {src:'ai',t:'前日成果レポートを自動生成（体験 <b>7件</b> / 入会 <b>2件</b>）',m:['08:00','自動']},
+  {src:'hc',t:'hacomono：体験→入会 <b>3件</b> を自動突合（中目黒2・下北沢1）',m:['昨日 21:00','突合']},
+  {src:'hp',t:'担当者が提案を<b>承認</b> → 中目黒店へ ¥50,000 を再配分',m:['昨日 18:40','承認済']},
+  {src:'ai',t:'<b>春日店</b> の静止画クリエイティブに疲弊を検知（CTR 0.9%）→ 差し替え提案',m:['昨日 15:10','提案']},
+];
+const yen=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
+const num=n=>Math.round(n).toLocaleString('ja-JP');
+function sparkPath(a,w,h){const mn=Math.min(...a),mx=Math.max(...a),r=mx-mn||1;return a.map((v,i)=>`${i?'L':'M'}${(i/(a.length-1)*w).toFixed(1)},${(h-((v-mn)/r)*(h-4)-2).toFixed(1)}`).join(' ');}
+
+function renderKPI(){
+  document.getElementById('kpis').innerHTML=KPIS.map(k=>{
+    const dcls=k.dir==='up'?'up':k.dir==='good'?'good':k.dir==='down'?'down':k.dir==='bad'?'bad':'';
+    const arrow=k.delta>0?'▲':k.delta<0?'▼':'—',dtxt=k.delta===0?'増減なし':`${arrow} ${Math.abs(k.delta)}%`;
+    const scol=(k.dir==='good'||k.dir==='up')?'var(--green)':(k.dir==='bad'||k.dir==='down')?'var(--red)':'var(--cyan)';
+    return `<div class="kpi"><div class="k">${k.k}</div><div class="v"><span class="cu" data-t="${k.v}" data-pre="${k.pre||''}" data-suf="${k.suf||''}">0</span></div>
+      <div class="foot"><span class="delta ${dcls}">${dtxt}</span><svg class="spark" viewBox="0 0 62 24"><path d="${sparkPath(k.spark,62,24)}" fill="none" stroke="${scol}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/></svg></div></div>`;
+  }).join('');
+  document.querySelectorAll('.cu').forEach(el=>{const target=+el.dataset.t,pre=el.dataset.pre,suf=el.dataset.suf,dur=900,t0=performance.now();
+    function step(now){const p=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-p,3);el.innerHTML=pre+Math.round(target*e).toLocaleString('ja-JP')+(suf?`<small>${suf}</small>`:'');if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);});
+}
+function calc(s){return {...s,tcpa:s.spend/s.taiken,ncpa:s.spend/s.nyukai,cvr:s.nyukai/s.taiken*100};}
+let stRows=[],sortKey=null,sortAsc=true;
+function renderStores(){
+  document.getElementById('stbody').innerHTML=stRows.map((s,i)=>{
+    const stc=s.status,stt=stc==='g'?'良好':stc==='o'?'注意':'要改善',dcls=s.dod<=0?'good':'bad',dar=s.dod>0?'▲':'▼';
+    return `<tr><td><span class="store-nm"><span class="r">${i+1}</span>${s.name}</span></td><td>${yen(s.spend)}</td><td>${s.taiken}</td><td>${s.nyukai}</td>
+      <td style="color:${stc==='r'?'var(--red)':stc==='o'?'var(--orange)':'#fff'};font-weight:800">${yen(s.tcpa)}</td><td>${yen(s.ncpa)}</td><td>${s.cvr.toFixed(0)}%</td>
+      <td><span class="split"><i style="width:${s.g}%;background:#8ab4f8"></i><i style="width:${100-s.g}%;background:#7cb0ff;opacity:.7"></i></span><div class="mini">G${s.g}・M${100-s.g}</div></td>
+      <td><span class="delta ${dcls}">${dar} ${Math.abs(s.dod)}%</span></td><td><span class="st ${stc}">${stt}</span></td></tr>`;
+  }).join('');
+}
+document.querySelectorAll('#stbl th.sortable').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.k;if(sortKey===k)sortAsc=!sortAsc;else{sortKey=k;sortAsc=(k==='tcpa'||k==='ncpa');}stRows.sort((a,b)=>(a[k]-b[k])*(sortAsc?1:-1));renderStores();}));
+function renderRank(){
+  const row=(x,i)=>`<div class="rk"><div class="no">${i+1}</div><div class="mg ${x.m}">${x.m==='gg'?'G':'M'}</div><div class="info"><div class="t">${x.t}</div><div class="s">${x.s}</div></div><div class="cpa" style="color:${x._bad?'var(--red)':'var(--green)'}">${x.cpa}</div></div>`;
+  document.getElementById('rankGood').innerHTML=`<div class="rk-h"><span class="chip g">BEST</span>体験CPAが低い広告 TOP3</div>`+RANK_GOOD.map((x,i)=>row(x,i)).join('');
+  document.getElementById('rankBad').innerHTML=`<div class="rk-h"><span class="chip r">WORST</span>体験CPAが高い広告（止める候補）</div>`+RANK_BAD.map((x,i)=>row({...x,_bad:1},i)).join('');
+}
+function renderFunnel(){
+  document.getElementById('funnel').innerHTML=FUNNEL.map((f,i)=>{
+    const w=Math.max(6,f.pct),drop=f.drop?`<span class="fdrop">${f.ofPrev?'体験→入会 ':''}${f.drop}</span>`:'';
+    return `<div class="frow"><div class="fl"><span class="n">${String(i+1).padStart(2,'0')}</span>${f.l}</div><div class="fbar ${f.warn?'warn':''}" style="width:0" data-w="${w}"></div><div class="fval">${num(f.v)}<small>${drop}</small></div></div>`;
+  }).join('');
+  requestAnimationFrame(()=>document.querySelectorAll('.fbar').forEach((b,i)=>setTimeout(()=>b.style.width=b.dataset.w+'%',80+i*90)));
+}
+function renderCre(){
+  document.getElementById('cre').innerHTML=CRE.map(c=>{const fc=c.fat>=75?'var(--red)':c.fat>=45?'var(--orange)':'var(--green)',lc=c.labc==='g'?'chip g':c.labc==='r'?'chip r':'chip b';
+    return `<div class="ccard"><div class="cthumb" style="background:${c.g}"><span class="lab ${lc}">${c.lab}</span><span class="txt">${c.t}</span></div>
+      <div class="cbody"><div class="cm"><span class="l">CTR</span><span class="v">${c.ctr}</span></div><div class="cm"><span class="l">CVR</span><span class="v">${c.cvr}</span></div><div class="cm"><span class="l">体験CPA</span><span class="v">${c.cpa}</span></div><div class="cm"><span class="l">疲弊度</span><span class="v" style="color:${fc}">${c.fat}</span></div><div class="fatigue"><i style="width:${c.fat}%;background:${fc}"></i></div></div></div>`;
+  }).join('');
+}
+function renderFeed(){
+  document.getElementById('feed').innerHTML=FEED.map(f=>{const nm=f.src==='ai'?'AI':f.src==='hc'?'hacomono':'担当者';
+    return `<div class="fitem"><div class="tl"><span class="fdot ${f.src}"></span><span class="fline"></span></div><div class="fc"><div class="ft">${f.t}</div><div class="fm"><span class="fsrc ${f.src}">${nm}</span>${f.m.map(x=>`<span>${x}</span>`).join('')}</div></div></div>`;
+  }).join('');
+}
+/* creative tabs */
+document.querySelectorAll('#cretabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#cretabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  const gen=b.dataset.t==='gen';document.getElementById('gen').classList.toggle('on',gen);document.getElementById('cre').style.display=gen?'none':'';
+}));
+document.querySelectorAll('.gtoggle .opt').forEach(o=>o.addEventListener('click',()=>{document.querySelectorAll('.gtoggle .opt').forEach(x=>x.classList.remove('on'));o.classList.add('on');}));
+
+/* chart */
+let DAILY=[],WEEKLY=[],MONTHLY=[];
+function renderChart(range){
+  const data=range==='w'?WEEKLY:range==='m'?MONTHLY:DAILY;
+  const W=760,H=250,pl=44,pr=44,pt=18,pb=30,iw=W-pl-pr,ih=H-pt-pb;
+  const sp=data.map(d=>d.spend),cp=data.map(d=>d.cpa),tk=data.map(d=>d.taiken);
+  const spMax=Math.max(...sp)*1.1,cpMax=Math.max(...cp)*1.25,tkMax=Math.max(...tk)*1.4;
+  const x=i=>pl+(data.length===1?iw/2:i/(data.length-1)*iw),ySp=v=>pt+ih-(v/spMax)*ih,yCp=v=>pt+ih-(v/cpMax)*ih,yTk=v=>pt+ih-(v/tkMax)*ih;
+  let g='';for(let i=0;i<=4;i++){const yy=pt+ih/4*i;g+=`<line x1="${pl}" y1="${yy}" x2="${W-pr}" y2="${yy}" stroke="rgba(148,163,184,.09)" stroke-width="1"/>`;}
+  const spLine=sp.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${ySp(v).toFixed(1)}`).join(' '),spArea=spLine+` L${x(data.length-1).toFixed(1)},${pt+ih} L${x(0).toFixed(1)},${pt+ih} Z`;
+  const cpLine=cp.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${yCp(v).toFixed(1)}`).join(' ');
+  const bw=Math.min(18,iw/data.length*0.5);
+  let bars=tk.map((v,i)=>`<rect x="${(x(i)-bw/2).toFixed(1)}" y="${yTk(v).toFixed(1)}" width="${bw}" height="${(pt+ih-yTk(v)).toFixed(1)}" rx="3" fill="rgba(163,230,53,.35)"/>`).join('');
+  let evs='';data.forEach((d,i)=>{if(d.ev){evs+=`<line x1="${x(i)}" y1="${pt}" x2="${x(i)}" y2="${pt+ih}" stroke="rgba(148,163,184,.45)" stroke-width="1" stroke-dasharray="3 3"/><circle cx="${x(i)}" cy="${pt+6}" r="3.5" fill="var(--cyan)"/>`;}});
+  let xl='';data.forEach((d,i)=>{if(range!=='d'||i%3===0||i===data.length-1)xl+=`<text x="${x(i)}" y="${H-10}" fill="var(--muted-2)" font-size="10" text-anchor="middle">${d.d}</text>`;});
+  let dots=cp.map((v,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${yCp(v).toFixed(1)}" r="3" fill="var(--orange)"/>`).join('');
+  document.getElementById('chart').innerHTML=`<defs><linearGradient id="spg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(34,211,238,.35)"/><stop offset="1" stop-color="rgba(34,211,238,0)"/></linearGradient></defs>
+    ${g}${bars}<path d="${spArea}" fill="url(#spg)"/><path d="${spLine}" fill="none" stroke="var(--cyan)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${cpLine}" fill="none" stroke="var(--orange)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>${evs}${dots}${xl}<rect id="hit" x="${pl}" y="${pt}" width="${iw}" height="${ih}" fill="transparent"/>`;
+  const svg=document.getElementById('chart'),tip=document.getElementById('tip'),rectW=()=>svg.getBoundingClientRect();
+  svg.querySelector('#hit').addEventListener('mousemove',e=>{const rect=rectW(),rel=(e.clientX-rect.left)/rect.width*W;let idx=Math.round((rel-pl)/(iw/(data.length-1||1)));idx=Math.max(0,Math.min(data.length-1,idx));const d=data[idx];
+    tip.innerHTML=`<b>${d.d}</b><div class="r"><span style="color:var(--cyan)">広告費</span><span>¥${(d.spend*1000).toLocaleString('ja-JP')}</span></div><div class="r"><span style="color:var(--lime)">体験</span><span>${d.taiken}件</span></div><div class="r"><span style="color:var(--orange)">体験CPA</span><span>¥${(d.cpa*1000).toLocaleString('ja-JP')}</span></div>${d.ev?`<div class="r" style="color:var(--cyan);font-size:10px">◆ ${d.ev}</div>`:''}`;
+    const px=x(idx)/W*rect.width;tip.style.left=Math.min(rect.width-150,Math.max(0,px-65))+'px';tip.style.top='14px';tip.style.opacity='1';});
+  svg.querySelector('#hit').addEventListener('mouseleave',()=>tip.style.opacity='0');
+}
+document.querySelectorAll('#trendtabs button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('#trendtabs button').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderChart(btn.dataset.r);}));
+
+const MODALS={
+  report:{h:'📄 日次レポート',b:`<p style="font-size:12.5px;color:var(--muted);line-height:1.8;margin-top:12px">毎朝08:00に自動生成。前日成果＋今日の打ち手を要約します。</p>
+    <div class="mrow"><span>店舗別 体験CPA / 入会CPA</span><b>7店舗</b></div><div class="mrow"><span>止める・寄せる 提案</span><b>3件（承認待ち）</b></div><div class="mrow"><span>PL販促費への反映</span><b>自動</b></div>`,a:'PDFで出力'},
+  camp:{h:'＋ 施策を追加',b:`<p style="font-size:12.5px;color:var(--muted);line-height:1.8;margin-top:12px">新規施策を登録（モックのため保存されません）。</p>
+    <div class="mrow"><span>媒体</span><b>Google / Meta</b></div><div class="mrow"><span>対象店舗</span><b>7店舗から選択</b></div><div class="mrow"><span>UTM自動付与</span><b>ON（店舗・媒体・KW識別）</b></div>`,a:'登録'},
+  ai:{h:'✨ AI提案の詳細（承認前）',b:`<p style="font-size:12.5px;color:var(--muted);line-height:1.8;margin-top:12px"><b style="color:#fff">船橋店 Meta</b> 予算再配分プラン</p>
+    <div class="mrow"><span>現状 体験CPA</span><b style="color:var(--red)">¥33,636</b></div><div class="mrow"><span>予算調整</span><b>▲30%（¥370,000→¥259,000）</b></div><div class="mrow"><span>寄せ先</span><b>中目黒・下北沢</b></div><div class="mrow"><span>全体 体験CPA 予測</span><b style="color:var(--green)">▲9%</b></div>
+    <a href="https://www.facebook.com/adsmanager/manage/campaigns?act=190036287101477" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:12px;border-radius:10px;background:linear-gradient(135deg,#1877f2,#4293ff);color:#fff;font-weight:800;font-size:13px;text-decoration:none;">↗ 該当のMeta広告を開いて予算を変更する</a>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.6;text-align:center">承認すると、変更すべき画面へワンクリックで移動。実際の予算変更はご自身で（AIは自動変更しません）。</div>`,a:'この提案を承認'},
+};
+function openModal(k){const m=MODALS[k];document.getElementById('modalbox').innerHTML=`<h3>${m.h}</h3>${m.b}<div class="mact"><button class="btn ghost" onclick="closeModal()">閉じる</button><button class="btn pri" onclick="closeModal()">${m.a}</button></div>`;document.getElementById('modal').classList.add('on');}
+function closeModal(){document.getElementById('modal').classList.remove('on');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+const NAV_MAP={'Overview':null,'店舗別CPA':'店舗別CPAマトリクス','媒体・広告別':'媒体・広告別ランキング','動線分析':'動線ファネル','クリエイティブ':'クリエイティブ','AI日次提案':'AI日次レポート','計測基盤':'計測基盤（土台）','PL連携':'PLダッシュボード連携'};
+document.querySelectorAll('.nav a').forEach(a=>a.addEventListener('click',()=>{
+  document.querySelectorAll('.nav a').forEach(x=>x.classList.remove('on'));a.classList.add('on');
+  const label=a.textContent.replace(/[0-9\-章\s]+$/,'').trim();
+  let target;for(const k of Object.keys(NAV_MAP)){if(label.startsWith(k)){target=NAV_MAP[k];break;}}
+  if(target==null){window.scrollTo({top:0,behavior:'smooth'});}
+  else{const h=[...document.querySelectorAll('.panel h2')].find(el=>el.textContent.includes(target));if(h)h.closest('.panel').scrollIntoView({behavior:'smooth',block:'start'});}
+  document.getElementById('side')&&document.getElementById('side').classList.remove('open');
+}));
+
+async function loadData(){
+  let data=null;
+  try{const r=await fetch('output/data.json');if(r.ok)data=await r.json();}catch(e){/* file:// では fetch 不可 → data.js フォールバック */}
+  if(!data)data=window.DASHBOARD_DATA||null;
+  if(!data){
+    document.getElementById('kpis').innerHTML='<div style="padding:24px;color:#f87171;font-weight:700">output/data.json がありません。先に python export_dashboard.py を実行してください。</div>';
+    renderCre();renderFeed();return;
+  }
+  KPIS=data.kpis;STORES=data.stores;DOD=data.stores.map(s=>s.dod);
+  RANK_GOOD=data.rank_good;RANK_BAD=data.rank_bad;FUNNEL=data.funnel;
+  DAILY=data.daily;WEEKLY=data.weekly;MONTHLY=data.monthly;
+  stRows=STORES.map((s,i)=>({...calc(s),dod:DOD[i]}));
+  const per=document.querySelector('.hero p');
+  if(per&&data.period)per.insertAdjacentHTML('beforeend',` <b>［データ期間 ${data.period.start}〜${data.period.end}／生成 ${data.generated_at}］</b>`);
+  renderKPI();renderStores();renderRank();renderFunnel();renderCre();renderFeed();renderChart('d');
+}
+loadData();
+</script>
+</body>
+</html>
