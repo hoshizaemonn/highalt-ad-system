@@ -477,6 +477,7 @@ svg{display:block;}
 </div><div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="box" id="modalbox"></div></div>
 
 <script src="output/data.js"></script>
+<script src="output/creatives.js"></script>
 <script>
 // データはDBから（python export_dashboard.py → output/data.json）
 let KPIS=[],STORES=[],DOD=[],RANK_GOOD=[],RANK_BAD=[],FUNNEL=[];
@@ -537,6 +538,33 @@ function renderCre(){
     return `<div class="ccard"><div class="cthumb" style="background:${c.g}"><span class="lab ${lc}">${c.lab}</span><span class="txt">${c.t}</span></div>
       <div class="cbody"><div class="cm"><span class="l">CTR</span><span class="v">${c.ctr}</span></div><div class="cm"><span class="l">CVR</span><span class="v">${c.cvr}</span></div><div class="cm"><span class="l">体験CPA</span><span class="v">${c.cpa}</span></div><div class="cm"><span class="l">疲弊度</span><span class="v" style="color:${fc}">${c.fat}</span></div><div class="fatigue"><i style="width:${c.fat}%;background:${fc}"></i></div></div></div>`;
   }).join('');
+}
+let CREATIVES=null;
+function bindGtoggle(){document.querySelectorAll('.gtoggle .opt').forEach(o=>o.addEventListener('click',()=>{document.querySelectorAll('.gtoggle .opt').forEach(x=>x.classList.remove('on'));o.classList.add('on');}));}
+function esc(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function renderGen(){
+  const g=document.getElementById('gen');if(!g||!CREATIVES)return; // 無ければ静的フォールバックのまま
+  const c=CREATIVES,b=c.based_on||{},w=b.win_pattern;
+  const winTxt=w?`${esc(w.t)}（${esc(w.s)}／CPA ${esc(w.cpa)}）`:'勝ちパターン未確定';
+  const live=b.data_is_live;
+  const srcBadge=live?'<span style="color:var(--green);font-weight:800">実データ根拠</span>':'<span style="color:var(--muted)">サンプルデータ根拠</span>';
+  const copies=(c.copies||[]).map(x=>`<div class="copyline"><div class="h">「${esc(x.h)}」</div><div class="d">${esc(x.d)}</div></div>`).join('');
+  const vp=esc(c.video_prompt).replace(/\n/g,'<br>');
+  const opts=(c.video_options||[]).map((o,i)=>`<div class="opt${i===0?' on':''}"><div class="t">${esc(o.label)}</div><div class="c">${esc(o.note)} ／ <b>${esc(o.cost)}</b></div></div>`).join('');
+  g.innerHTML=`<div class="gh"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="4"/></svg>勝ちパターン（${winTxt}）から、次の一手をAIが生成 ／ ${srcBadge} ／ <span style="color:var(--muted)">生成 ${esc(c.generated_at)}・${esc(c.model)}</span></div>
+    <div class="gcols">
+      <div>
+        <div style="font-size:10.5px;font-weight:800;color:var(--muted);margin-bottom:9px;">▶ 広告文案（AI生成・3案）</div>
+        ${copies}
+      </div>
+      <div>
+        <div style="font-size:10.5px;font-weight:800;color:var(--muted);margin-bottom:9px;">▶ 動画生成プロンプト（AI生成）</div>
+        <div class="promptbox">${vp}</div>
+        <div class="gtoggle">${opts}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6">※ 動画の<b>本生成は実費が発生</b>するため、鈴木さん承認後に実行します。上は生成用プロンプトです。</div>
+      </div>
+    </div>`;
+  bindGtoggle();
 }
 function renderFeed(){
   document.getElementById('feed').innerHTML=FEED.map(f=>{const nm=f.src==='ai'?'AI':f.src==='hc'?'hacomono':'担当者';
@@ -624,6 +652,9 @@ async function loadData(){
   let data=null;
   try{const r=await fetch('output/data.json');if(r.ok)data=await r.json();}catch(e){/* file:// では fetch 不可 → data.js フォールバック */}
   if(!data)data=window.DASHBOARD_DATA||null;
+  try{const rc=await fetch('output/creatives.json');if(rc.ok)CREATIVES=await rc.json();}catch(e){/* file:// フォールバック */}
+  if(!CREATIVES)CREATIVES=window.CREATIVES||null;
+  renderGen();
   if(!data){
     document.getElementById('kpis').innerHTML='<div style="padding:24px;color:#f87171;font-weight:700">output/data.json がありません。先に python export_dashboard.py を実行してください。</div>';
     renderCre();renderFeed();return;
