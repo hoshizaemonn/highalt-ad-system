@@ -317,7 +317,7 @@ svg{display:block;}
       <a><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"/><path d="M18 2l4 4-8 8h-4v-4z"/></svg>計測基盤<span class="rq">5-6</span></a>
       <a><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 13l3 3 7-8"/></svg>PL連携<span class="rq">6章</span></a>
     </nav>
-    <div class="who"><div class="av">斗</div><div><div class="t">株式会社斗 運用</div><div class="s">● 自動監視ON</div></div></div>
+    <div class="who" onclick="setOperator()" title="クリックで担当者を変更" style="cursor:pointer"><div class="av">斗</div><div><div class="t" id="whoname">株式会社斗 運用</div><div class="s">● 自動監視ON</div></div></div>
   </aside>
 
   <main class="main">
@@ -433,13 +433,15 @@ svg{display:block;}
           <div class="ph"><div class="hl"><h2><svg class="hicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>AI日次レポート＋予算提案</h2><span class="req">要件 5-3</span></div><span class="analyzing"><span class="rot"></span>分析中</span></div>
           <div class="aisum"><div class="l">本日のサマリ（7/22 08:00 自動生成）</div><p>前日 体験 <b>7件</b>／入会 <b>2件</b>。全体の体験CPAは <b>¥20,300</b>（前日比 ▲8%）。<b>船橋・春日</b>の2店が全店平均を上回り要改善。</p></div>
           <div class="effect"><div><div class="l">推定改善効果（提案を全て採用した場合）</div><div class="n" id="eff">+12.4%</div></div><svg width="52" height="30" viewBox="0 0 52 30"><path d="M2,26 L12,22 L22,23 L32,15 L42,12 L50,6" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round"/></svg></div>
-          <div class="prop"><div class="tag"><span>止める候補 ／ 予算再配分</span><span class="wait">承認待ち</span></div>
-            <p><b>船橋店 Meta</b> の体験CPAが全店平均の1.5倍（¥33,636）。予算を <b>▲30%</b> し <b>中目黒・下北沢</b>へ寄せると、全体の体験CPAが約 <b>▲9%</b> 改善する見込みです。</p>
-            <div class="act"><button class="btn ok mini" onclick="openModal('ai')">承認</button><button class="btn no mini">却下</button><button class="btn ghost mini" onclick="openModal('ai')">詳細</button></div></div>
-          <div class="prop"><div class="tag"><span>寄せる候補 ／ 入札調整</span><span class="wait">承認待ち</span></div>
-            <p><b>祖師ヶ谷大蔵 Google</b>「高地トレーニング 世田谷」のCPAが低め。入札 <b>+15%</b> で体験 <b>+3件/週</b> の見込み。</p>
-            <div class="act"><button class="btn ok mini">承認</button><button class="btn no mini">却下</button></div></div>
-          <div class="human"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>AIは<b style="color:#fff">提案まで</b>。実際の予算変更・配信停止は<b style="color:#fff">担当者の承認後</b>に行います（御社は提案を見て選ぶだけ）。</span></div>
+          <div id="props"></div>
+          <div class="human"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>AIは<b style="color:#fff">提案まで</b>。実際の予算変更・配信停止は<b style="color:#fff">担当者の承認後</b>に行います（御社は提案を見て選ぶだけ）。承認後は該当広告の画面へワンクリック案内 → 変更したら「適用を記録」を押すだけで、採用率と削減効果が自動集計されます。</span></div>
+        </section>
+
+        <!-- D方式＋実行ログ: 承認・適用の記録（提案→変更→効果の因果を切らない） -->
+        <section class="panel">
+          <div class="ph"><div class="hl"><h2><svg class="hicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>承認・適用ログ</h2><span class="req">D方式＋実行ログ</span></div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="chip b" id="adoptrate">採用率 —</span><button class="btn ghost mini" onclick="exportDecisions()">エクスポート</button></div></div>
+          <div class="feed" id="declog"></div>
         </section>
 
         <!-- 5-3 フィード -->
@@ -610,12 +612,117 @@ const MODALS={
     <div class="mrow"><span>店舗別 体験CPA / 入会CPA</span><b>7店舗</b></div><div class="mrow"><span>止める・寄せる 提案</span><b>3件（承認待ち）</b></div><div class="mrow"><span>PL販促費への反映</span><b>自動</b></div>`,a:'PDFで出力'},
   camp:{h:'＋ 施策を追加',b:`<p style="font-size:12.5px;color:var(--muted);line-height:1.8;margin-top:12px">新規施策を登録（モックのため保存されません）。</p>
     <div class="mrow"><span>媒体</span><b>Google / Meta</b></div><div class="mrow"><span>対象店舗</span><b>7店舗から選択</b></div><div class="mrow"><span>UTM自動付与</span><b>ON（店舗・媒体・KW識別）</b></div>`,a:'登録'},
-  ai:{h:'✨ AI提案の詳細（承認前）',b:`<p style="font-size:12.5px;color:var(--muted);line-height:1.8;margin-top:12px"><b style="color:#fff">船橋店 Meta</b> 予算再配分プラン</p>
-    <div class="mrow"><span>現状 体験CPA</span><b style="color:var(--red)">¥33,636</b></div><div class="mrow"><span>予算調整</span><b>▲30%（¥370,000→¥259,000）</b></div><div class="mrow"><span>寄せ先</span><b>中目黒・下北沢</b></div><div class="mrow"><span>全体 体験CPA 予測</span><b style="color:var(--green)">▲9%</b></div>
-    <a href="https://www.facebook.com/adsmanager/manage/campaigns?act=190036287101477" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:12px;border-radius:10px;background:linear-gradient(135deg,#1877f2,#4293ff);color:#fff;font-weight:800;font-size:13px;text-decoration:none;">↗ 該当のMeta広告を開いて予算を変更する</a>
-    <div style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.6;text-align:center">承認すると、変更すべき画面へワンクリックで移動。実際の予算変更はご自身で（AIは自動変更しません）。</div>`,a:'この提案を承認'},
 };
 function openModal(k){const m=MODALS[k];document.getElementById('modalbox').innerHTML=`<h3>${m.h}</h3>${m.b}<div class="mact"><button class="btn ghost" onclick="closeModal()">閉じる</button><button class="btn pri" onclick="closeModal()">${m.a}</button></div>`;document.getElementById('modal').classList.add('on');}
+
+/* ============================================================
+   D方式＋実行ログ（承認 → リンクで該当広告へ → 適用/見送りを記録）
+   保存先: localStorage（統合前の中間実装）。
+   PLダッシュボード統合時はこの schema のまま API/DB 保存に差し替える。
+   import_decisions.py がエクスポートJSONをSQLiteへ取り込む。
+   ============================================================ */
+const PROPOSALS=[
+  {id:'P-20260722-01',kind:'止める候補 ／ 予算再配分',store:'船橋店',media:'Meta',
+   text:'<b>船橋店 Meta</b> の体験CPAが全店平均の1.5倍（¥33,636）。予算を <b>▲30%</b> し <b>中目黒・下北沢</b>へ寄せると、全体の体験CPAが約 <b>▲9%</b> 改善する見込みです。',
+   budget_before:370000,budget_after:259000,expect:'全体 体験CPA ▲9%',
+   link:'https://www.facebook.com/adsmanager/manage/campaigns?act=190036287101477',link_label:'該当のMeta広告を開いて予算を変更する',
+   rows:[['現状 体験CPA','<b style="color:var(--red)">¥33,636</b>'],['予算調整','<b>▲30%（¥370,000→¥259,000）</b>'],['寄せ先','<b>中目黒・下北沢</b>'],['全体 体験CPA 予測','<b style="color:var(--green)">▲9%</b>']]},
+  {id:'P-20260722-02',kind:'寄せる候補 ／ 入札調整',store:'祖師ヶ谷大蔵',media:'Google',
+   text:'<b>祖師ヶ谷大蔵 Google</b>「高地トレーニング 世田谷」のCPAが低め。入札 <b>+15%</b> で体験 <b>+3件/週</b> の見込み。',
+   budget_before:null,budget_after:null,expect:'体験 +3件/週',
+   link:'https://ads.google.com/aw/campaigns',link_label:'該当のGoogle広告を開いて入札を変更する',
+   rows:[['対象','<b>「高地トレーニング 世田谷」</b>'],['入札調整','<b>+15%</b>'],['体験 予測','<b style="color:var(--green)">+3件/週</b>']]},
+];
+const DEC_KEY='highalt_ad_decisions',OP_KEY='highalt_ad_operator';
+function loadDecisions(){try{return JSON.parse(localStorage.getItem(DEC_KEY))||[];}catch(e){return [];}}
+function saveDecisions(a){localStorage.setItem(DEC_KEY,JSON.stringify(a));renderProps();renderDecLog();}
+function decisionOf(pid){return loadDecisions().filter(d=>d.proposal_id===pid).sort((a,b)=>b.ts.localeCompare(a.ts))[0]||null;}
+function getOperator(force){
+  let op=localStorage.getItem(OP_KEY);
+  if(!op||force){op=prompt('担当者名を入力してください（記録に残ります）',op||'');if(op){op=op.trim();if(op)localStorage.setItem(OP_KEY,op);}}
+  const el=document.getElementById('whoname');if(el&&localStorage.getItem(OP_KEY))el.textContent=localStorage.getItem(OP_KEY)+'（株式会社斗 運用）';
+  return localStorage.getItem(OP_KEY)||null;
+}
+function setOperator(){getOperator(true);}
+function record(pid,action,fields){
+  const op=getOperator(false);if(!op)return alert('担当者名が未入力のため記録できません');
+  const p=PROPOSALS.find(x=>x.id===pid);
+  const a=loadDecisions();
+  // ローカル時刻で記録（toISOStringはUTCになり9時間ずれる）
+  const now=new Date(),z=n=>String(n).padStart(2,'0');
+  const ts=`${now.getFullYear()}-${z(now.getMonth()+1)}-${z(now.getDate())} ${z(now.getHours())}:${z(now.getMinutes())}:${z(now.getSeconds())}`;
+  a.push({proposal_id:pid,ts,operator:op,action,
+          store:p.store,media:p.media,kind:p.kind,expect:p.expect,
+          budget_before:p.budget_before,...fields});
+  saveDecisions(a);closeModal();
+}
+function stChip(d){
+  if(!d)return '<span class="wait">承認待ち</span>';
+  if(d.action==='applied')return '<span class="wait" style="color:var(--green);background:rgba(34,197,94,.12)">適用済</span>';
+  if(d.action==='approved')return '<span class="wait" style="color:var(--cyan);background:rgba(34,211,238,.12)">承認済・適用待ち</span>';
+  return '<span class="wait" style="color:var(--muted);background:rgba(148,163,184,.12)">見送り</span>';
+}
+function renderProps(){
+  const el=document.getElementById('props');if(!el)return;
+  el.innerHTML=PROPOSALS.map(p=>{
+    const d=decisionOf(p.id);
+    let act;
+    if(!d)act=`<button class="btn ok mini" onclick="openProp('${p.id}')">承認</button><button class="btn no mini" onclick="openReject('${p.id}')">見送る</button><button class="btn ghost mini" onclick="openProp('${p.id}')">詳細</button>`;
+    else if(d.action==='approved')act=`<a class="btn pri mini" href="${p.link}" target="_blank">↗ 広告画面を開く</a><button class="btn ok mini" onclick="openApply('${p.id}')">適用を記録</button><button class="btn no mini" onclick="openReject('${p.id}')">見送りに変更</button>`;
+    else act=`<button class="btn ghost mini" onclick="openProp('${p.id}')">詳細</button>`;
+    return `<div class="prop"><div class="tag"><span>${p.kind}</span>${stChip(d)}</div><p>${p.text}</p><div class="act">${act}</div></div>`;
+  }).join('');
+}
+function openProp(pid){
+  const p=PROPOSALS.find(x=>x.id===pid),d=decisionOf(pid);
+  const rows=p.rows.map(r=>`<div class="mrow"><span>${r[0]}</span>${r[1]}</div>`).join('');
+  const approveBtn=(!d||d.action==='rejected')?`<button class="btn pri" onclick="record('${pid}','approved',{})">この提案を承認</button>`:'';
+  document.getElementById('modalbox').innerHTML=`<h3>✨ AI提案の詳細（${p.id}）</h3>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.8;margin-top:12px"><b style="color:#fff">${p.store} ${p.media}</b></p>${rows}
+    <a href="${p.link}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:12px;border-radius:10px;background:linear-gradient(135deg,#1877f2,#4293ff);color:#fff;font-weight:800;font-size:13px;text-decoration:none;">↗ ${p.link_label}</a>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.6;text-align:center">承認 → 広告画面で変更 → 「適用を記録」の3ステップ。AIは自動変更しません。</div>
+    <div class="mact"><button class="btn ghost" onclick="closeModal()">閉じる</button>${approveBtn}</div>`;
+  document.getElementById('modal').classList.add('on');
+}
+function openApply(pid){
+  const p=PROPOSALS.find(x=>x.id===pid);
+  const amt=p.budget_before!=null?`<div style="margin-top:14px"><label style="font-size:11px;color:var(--muted);font-weight:700">実際に変更した後の予算（円）</label>
+    <input id="ap_amt" type="number" value="${p.budget_after||''}" style="width:100%;margin-top:6px;padding:10px;border-radius:9px;border:1px solid var(--line);background:var(--bg0);color:var(--ink);font-size:14px;font-weight:700"></div>`:'';
+  document.getElementById('modalbox').innerHTML=`<h3>✅ 適用を記録（${p.id}）</h3>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.8;margin-top:10px">${p.store} ${p.media} — 広告画面で実際に変更した内容を記録します。</p>${amt}
+    <div style="margin-top:12px"><label style="font-size:11px;color:var(--muted);font-weight:700">メモ（任意）</label>
+    <input id="ap_memo" type="text" placeholder="例）提案どおり適用" style="width:100%;margin-top:6px;padding:10px;border-radius:9px;border:1px solid var(--line);background:var(--bg0);color:var(--ink);font-size:13px"></div>
+    <div class="mact"><button class="btn ghost" onclick="closeModal()">閉じる</button><button class="btn pri" onclick="record('${pid}','applied',{budget_after_actual:document.getElementById('ap_amt')?+document.getElementById('ap_amt').value||null:null,memo:document.getElementById('ap_memo').value||''})">記録する</button></div>`;
+  document.getElementById('modal').classList.add('on');
+}
+function openReject(pid){
+  const p=PROPOSALS.find(x=>x.id===pid);
+  document.getElementById('modalbox').innerHTML=`<h3>⏸ 見送りを記録（${p.id}）</h3>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.8;margin-top:10px">${p.store} ${p.media} — 見送った理由を1行だけ残してください（AIの次回提案の学習材料になります）。</p>
+    <div style="margin-top:12px"><input id="rj_memo" type="text" placeholder="例）月末までは現予算を維持したい" style="width:100%;padding:10px;border-radius:9px;border:1px solid var(--line);background:var(--bg0);color:var(--ink);font-size:13px"></div>
+    <div class="mact"><button class="btn ghost" onclick="closeModal()">閉じる</button><button class="btn pri" onclick="record('${pid}','rejected',{memo:document.getElementById('rj_memo').value||''})">記録する</button></div>`;
+  document.getElementById('modal').classList.add('on');
+}
+function renderDecLog(){
+  const el=document.getElementById('declog');if(!el)return;
+  const a=loadDecisions().slice().sort((x,y)=>y.ts.localeCompare(x.ts));
+  const latest={};loadDecisions().forEach(d=>{if(!latest[d.proposal_id]||d.ts>latest[d.proposal_id].ts)latest[d.proposal_id]=d;});
+  const done=Object.values(latest),applied=done.filter(d=>d.action==='applied').length;
+  const rateEl=document.getElementById('adoptrate');
+  if(rateEl)rateEl.textContent=done.length?`採用率 ${Math.round(applied/done.length*100)}%（適用${applied}/${done.length}）`:'採用率 —';
+  if(!a.length){el.innerHTML='<div style="padding:16px;font-size:11.5px;color:var(--muted)">まだ記録がありません。AI提案の「承認」→ 広告画面で変更 →「適用を記録」で、ここに履歴と採用率が貯まります（提案→変更→効果の因果を証明する台帳）。</div>';return;}
+  el.innerHTML=a.map(d=>{
+    const lb=d.action==='applied'?'適用':d.action==='approved'?'承認':'見送り';
+    const cls=d.action==='applied'?'hc':d.action==='approved'?'ai':'hp';
+    const money=d.action==='applied'&&d.budget_before!=null?` ¥${(+d.budget_before).toLocaleString()}→¥${(d.budget_after_actual||0).toLocaleString()}`:'';
+    return `<div class="fitem"><div class="tl"><span class="fdot ${cls}"></span><span class="fline"></span></div><div class="fc"><div class="ft"><b>${lb}</b>：${esc(d.store)} ${esc(d.media)}（${esc(d.kind)}）${money}${d.memo?` — ${esc(d.memo)}`:''}</div><div class="fm"><span class="fsrc ${cls}">${esc(d.operator)}</span><span>${d.ts}</span><span>${d.proposal_id}</span></div></div></div>`;
+  }).join('');
+}
+function exportDecisions(){
+  const blob=new Blob([JSON.stringify({exported_at:new Date().toISOString(),decisions:loadDecisions()},null,2)],{type:'application/json'});
+  const u=URL.createObjectURL(blob),aEl=document.createElement('a');
+  aEl.href=u;aEl.download='highalt_ad_decisions_'+new Date().toISOString().slice(0,10)+'.json';aEl.click();URL.revokeObjectURL(u);
+}
 function closeModal(){document.getElementById('modal').classList.remove('on');}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 const NAV_MAP={'Overview':null,'店舗別CPA':'店舗別CPAマトリクス','媒体・広告別':'媒体・広告別ランキング','動線分析':'動線ファネル','クリエイティブ':'クリエイティブ','AI日次提案':'AI日次レポート','計測基盤':'計測基盤（土台）','PL連携':'PLダッシュボード連携'};
@@ -657,7 +764,7 @@ async function loadData(){
   renderGen();
   if(!data){
     document.getElementById('kpis').innerHTML='<div style="padding:24px;color:#f87171;font-weight:700">output/data.json がありません。先に python export_dashboard.py を実行してください。</div>';
-    renderCre();renderFeed();return;
+    renderCre();renderFeed();renderProps();renderDecLog();return;
   }
   KPIS=data.kpis;STORES=data.stores;DOD=data.stores.map(s=>s.dod);
   RANK_GOOD=data.rank_good;RANK_BAD=data.rank_bad;FUNNEL=data.funnel;
@@ -666,8 +773,9 @@ async function loadData(){
   const per=document.querySelector('.hero p');
   if(per&&data.period)per.insertAdjacentHTML('beforeend',` <b>［データ期間 ${data.period.start}〜${data.period.end}／生成 ${data.generated_at}］</b>`);
   renderStatus(data.status);
-  renderKPI();renderStores();renderRank();renderFunnel();renderCre();renderFeed();renderChart('d');
+  renderKPI();renderStores();renderRank();renderFunnel();renderCre();renderFeed();renderChart('d');renderProps();renderDecLog();
 }
+(function(){const op=localStorage.getItem(OP_KEY);const el=document.getElementById('whoname');if(op&&el)el.textContent=op+'（株式会社斗 運用）';})();
 loadData();
 </script>
 </body>
