@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Hiragino Sans","Noto Sans JP",sans-serif;background:#0f1420;color:#e8edf5;padding:34px 40px;width:1240px}
+  h1{font-size:26px;font-weight:800;letter-spacing:.02em}
+  h1 .sub{font-size:14px;font-weight:600;color:#8aa0c0;margin-left:12px}
+  .bar{height:3px;background:linear-gradient(90deg,#3b82f6,#22d3ee);border-radius:2px;margin:12px 0 22px}
+  .row{display:flex;gap:18px;margin-bottom:18px}
+  .card{background:#182235;border:1px solid #26344d;border-radius:12px;padding:16px 18px;flex:1}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;margin-bottom:10px}
+  .t-now{background:#14342a;color:#4ade80;border:1px solid #256b4e}
+  .t-add{background:#2a2140;color:#c4b5fd;border:1px solid #5b4b8a}
+  .t-wait{background:#3a2a14;color:#fbbf24;border:1px solid #7a5a1e}
+  .card h2{font-size:16px;font-weight:800;margin-bottom:6px}
+  .card .d{font-size:12.5px;color:#a9b8d0;line-height:1.6}
+  .big{flex:2}
+  ul{list-style:none;margin-top:8px}
+  li{font-size:12.5px;color:#cdd8ea;padding:5px 0 5px 20px;position:relative;line-height:1.5}
+  li::before{content:"";position:absolute;left:2px;top:10px;width:7px;height:7px;border-radius:2px;background:#3b82f6}
+  .add li::before{background:#a78bfa}
+  .wait li::before{background:#fbbf24}
+  .two{display:flex;gap:14px;margin-top:10px}
+  .vbox{flex:1;background:#0f1a2c;border:1px dashed #3a4a66;border-radius:9px;padding:10px 12px}
+  .vbox .h{font-size:12px;font-weight:800;color:#7dd3fc;margin-bottom:5px}
+  .vbox .f{font-size:11.5px;color:#9fb0c8;line-height:1.55}
+  .num{font-weight:800;color:#22d3ee}
+  .footrow{display:flex;gap:18px;margin-top:6px}
+  .mini{background:#141c2c;border:1px solid #263148;border-radius:10px;padding:12px 15px;flex:1}
+  .mini .h{font-size:12.5px;font-weight:800;margin-bottom:5px}
+  .mini .h.red{color:#f87171}
+  .mini .h.blue{color:#60a5fa}
+  .mini .f{font-size:12px;color:#a9b8d0;line-height:1.55}
+  .deadline{font-size:13px;font-weight:800;color:#fbbf24;text-align:right;margin-top:4px}
+</style></head>
+<body>
+  <h1>ハイアルチ 広告自動化ダッシュボード<span class="sub">8/8（金）共有スコープ　─　2026-08-04 MTG反映</span></h1>
+  <div class="bar"></div>
+
+  <div class="row">
+    <div class="card">
+      <span class="tag t-now">✓ デモ済み（8/4 会議）</span>
+      <div class="d">4ソース（Meta / Google / GA4 / hacomono）自動反映・期間選択（プリセット＋カスタム）・店舗別 色分け（赤黄白＝業界平均基準）・媒体別・純広告CPA・クリエ「止める候補」判定</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card big add">
+      <span class="tag t-add">＋ 追加①　店舗別 × 媒体別ページ（コア・2年来の課題）</span>
+      <h2>店舗ごとに「どの媒体・どのクリエが効いたか」を可視化</h2>
+      <div class="two">
+        <div class="vbox"><div class="h">視点A：キャンペーン → 店舗</div>
+          <div class="f">PMAX（富士登山・マラソン等）が<br>A店 <span class="num">3件</span>／東日本橋 <span class="num">2件</span>／…<br>どの店舗の入会に効いたか</div></div>
+        <div class="vbox"><div class="h">視点B：店舗 → クリエ／媒体</div>
+          <div class="f">各店舗で Google / Meta・<br>どの広告が良いか<br><span class="num">件数＋獲得コスト</span>両方</div></div>
+      </div>
+      <div class="d" style="margin-top:9px">オーバービューの店舗をクリック → その内訳（例「体験2件が東日本橋2件なのか」）までドリルダウン</div>
+    </div>
+    <div class="card add">
+      <span class="tag t-add">＋ 追加②　レスポンシブ改善</span>
+      <h2>小画面のカード重なり解消</h2>
+      <div class="d">山本さんPCで崩れる件。360〜1440px 全幅で目視検証してから共有（納品前ゲート）</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card add">
+      <span class="tag t-add">＋ 追加③　クリエイティブ実表示＋コピー別</span>
+      <ul>
+        <li>実画像を表示（今の判定＋画像）</li>
+        <li>媒体別に紐付け → コスト／体験／入会</li>
+        <li>見出し A/B/C/D 別の成績（Metaの複数見出し配信）</li>
+        <li>→ チラシ・LPにも転用できる形で</li>
+      </ul>
+    </div>
+    <div class="card add">
+      <span class="tag t-add">＋ 追加④　変更履歴フィード</span>
+      <ul>
+        <li>「誰が」「何を（予算/クリエ変更）」</li>
+        <li>アプリのログインID（3名別）と紐付け</li>
+        <li>Meta / Google の変更履歴から取得</li>
+        <li>「なんでこれ変えたの？」を人に聞ける</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footrow">
+    <div class="mini"><div class="h blue">決定待ち → 案を提示</div>
+      <div class="f">・本部共通費(PMAX)配分＝<b style="color:#c4b5fd">入会数ベース案</b>を提示<br>・ChatGPT / Seedance 契約プラン提案</div></div>
+    <div class="mini"><div class="h blue">発行</div>
+      <div class="f">坪井・山本・松尾 <b>3名分</b><br>URL / ID / パス</div></div>
+    <div class="mini"><div class="h red">先に調査（信頼性）</div>
+      <div class="f">一部店舗で広告費が<b>異常値</b><br>（会議での指摘・表示バグ疑い）→最初に潰す</div></div>
+  </div>
+  <div class="deadline">締切：2026-08-08（金）／今後の伸びしろ：予測（予算→体験数見込み）・広告費 手入力廃止→PL自動反映・AI生成（画像/コピー/動画指示）</div>
+</body></html>
